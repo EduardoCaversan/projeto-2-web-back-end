@@ -219,4 +219,38 @@ test('Integração completa — requer API e MySQL; cria dados fictícios', {
     await chamar('/lancamentos', 400, tokenA, 'POST', { ...dados, tipo: 'entrada', categoriaId: entrada.id, fonteDestinoId: cartao.id, parcelas: 1 });
     for (const compra of [simples, unica]) await chamar(`/lancamentos/${compra.itens[0].id}?todasParcelas=true`, 204, tokenA, 'DELETE');
   });
+  await t.test('Saúde financeira: indicadores, projeção, aviso, histórico vazio e isolamento', async () => {
+    await chamar('/saude-financeira', 401);
+    await chamar('/saude-financeira', 401, 'invalido');
+    const vazio = await chamar('/saude-financeira', 200, tokenB);
+    assert.deepEqual(vazio.indicadores, { taxaPoupanca: null, comprometimentoCartoes: null, parcelasAVencer: 0 });
+    assert.ok(vazio.projecao.every((p) => p.saidas === 0 && p.entradas === 0));
+    const antesA = await chamar('/saude-financeira', 200, tokenA);
+    const categoriasB = await chamar('/categorias', 200, tokenB);
+    const contaB = (await chamar('/fontes-destinos', 200, tokenB))[0];
+    const entradaB = categoriasB.find((c) => c.tipo === 'entrada');
+    const saidaB = categoriasB.find((c) => c.tipo === 'saida');
+    const agora = new Date();
+    for (let i = 1; i <= 3; i++) {
+      const data = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - i, 15)).toISOString().slice(0, 10);
+      await chamar('/lancamentos', 201, tokenB, 'POST', { ...dados, data, tipo: 'entrada', valor: 1000, categoriaId: entradaB.id, fonteDestinoId: contaB.id });
+      await chamar('/lancamentos', 201, tokenB, 'POST', { ...dados, data, valor: 600, categoriaId: saidaB.id, fonteDestinoId: contaB.id });
+    }
+    const cartaoB = await chamar('/fontes-destinos', 201, tokenB, 'POST', {
+      nome: 'Cartão saúde', tipo: 'cartao_credito', dia_fechamento: 31, dia_vencimento: 31, limite: 1000,
+    });
+    // Fechamento igual ao vencimento: compra no dia 1 vence no mês seguinte.
+    await chamar('/lancamentos', 201, tokenB, 'POST', { ...dados, data: mesAtual().inicio,
+      categoriaId: saidaB.id, fonteDestinoId: cartaoB.id, parcelas: 3 });
+    const saude = await chamar(`/saude-financeira?usuario_id=${usuarioA.id}`, 200, tokenB);
+    assert.equal(saude.rendaMediaMensal, 1000); assert.equal(saude.mesesComMovimento, 3);
+    assert.equal(saude.indicadores.taxaPoupanca, 0.4);
+    assert.equal(saude.indicadores.parcelasAVencer, 100);
+    assert.equal(saude.indicadores.comprometimentoCartoes, 0.0222);
+    assert.deepEqual(saude.projecao.map((p) => p.faturasConhecidas), [0, 33.34, 33.33]);
+    assert.deepEqual(saude.projecao.map((p) => p.saldoPrevisto), [400, 366.66, 366.67]);
+    assert.match(saude.aviso, /não constituem recomendação financeira profissional/);
+    assert.ok(saude.dicas.some((d) => d.includes('100.00')));
+    assert.deepEqual(await chamar('/saude-financeira', 200, tokenA), antesA);
+  });
 });

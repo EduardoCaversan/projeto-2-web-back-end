@@ -9,6 +9,7 @@ app.use('/categorias', protegerRota, require('./routes/categorias'));
 app.use('/fontes-destinos', protegerRota, require('./routes/fontesDestinos'));
 app.use('/lancamentos', protegerRota, require('./routes/lancamentos'));
 app.use('/relatorios', protegerRota, require('./routes/relatorios'));
+app.use('/saude-financeira', protegerRota, require('./routes/saudeFinanceira'));
 
 app.use((req, res) => res.status(404).json({ erro: 'Rota não encontrada.' }));
 app.use((erro, req, res, next) => {

@@ -2,6 +2,7 @@ const pool = require('../database/connection');
 const { periodoAnterior } = require('../utils/datas');
 const FonteDestino = require('./FonteDestino');
 const { preverFaturas } = require('../utils/faturas');
+const { periodoSaude, calcularSaude } = require('../utils/saudeFinanceira');
 const arredondar = (numero) => Number(numero.toFixed(2));
 
 class Relatorio {
@@ -45,14 +46,34 @@ class Relatorio {
       contas: fontes.filter((f) => f.tipo === 'conta').map((f) => ({ ...f, saldo: arredondar(f.entradas - f.saidas) })) };
   }
 
-  async faturas(usuarioId, meses) {
+  async dadosCartoes(usuarioId) {
     const cartoes = await FonteDestino.listar(usuarioId, 'cartao_credito');
     const [lancamentos] = await pool.execute(`SELECT l.id, l.tipo, l.descricao, l.valor, l.data,
       l.fonte_destino_id, l.parcela_atual, l.total_parcelas FROM lancamentos l
       JOIN fontes_destinos f ON f.id = l.fonte_destino_id AND f.usuario_id = l.usuario_id
       WHERE l.usuario_id = ? AND l.tipo = 'saida' AND f.tipo = 'cartao_credito'
       ORDER BY l.data, l.parcela_atual, l.id`, [usuarioId]);
+    return { cartoes, lancamentos };
+  }
+
+  async faturas(usuarioId, meses) {
+    const { cartoes, lancamentos } = await this.dadosCartoes(usuarioId);
     return { meses, cartoes: preverFaturas(cartoes, lancamentos, meses) };
+  }
+
+  async saudeFinanceira(usuarioId) {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const historico = periodoSaude(hoje);
+    const [mensais] = await pool.execute(`SELECT DATE_FORMAT(l.data, '%Y-%m') AS mes,
+      SUM(CASE WHEN l.tipo = 'entrada' THEN l.valor ELSE 0 END) AS entradas,
+      SUM(CASE WHEN l.tipo = 'saida' THEN l.valor ELSE 0 END) AS saidas,
+      SUM(CASE WHEN l.tipo = 'saida' AND f.tipo <> 'cartao_credito' THEN l.valor ELSE 0 END) AS saidas_sem_cartao
+      FROM lancamentos l
+      JOIN fontes_destinos f ON f.id = l.fonte_destino_id AND f.usuario_id = l.usuario_id
+      WHERE l.usuario_id = ? AND l.data BETWEEN ? AND ?
+      GROUP BY DATE_FORMAT(l.data, '%Y-%m') ORDER BY mes`, [usuarioId, historico.inicio, historico.fim]);
+    const { cartoes, lancamentos } = await this.dadosCartoes(usuarioId);
+    return calcularSaude(mensais, cartoes, lancamentos, hoje);
   }
 }
 module.exports = new Relatorio();

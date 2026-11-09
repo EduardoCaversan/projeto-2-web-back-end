@@ -35,7 +35,7 @@ async function requisicao(caminho, status, { method = 'GET', body, bearer } = {}
 }
 
 test('Todas as famílias privadas exigem token', async () => {
-  for (const rota of ['/auth/me', '/categorias', '/fontes-destinos', '/lancamentos', '/relatorios/categorias', '/relatorios/fontes-destinos', '/relatorios/faturas']) await requisicao(rota, 401);
+  for (const rota of ['/auth/me', '/categorias', '/fontes-destinos', '/lancamentos', '/relatorios/categorias', '/relatorios/fontes-destinos', '/relatorios/faturas', '/saude-financeira']) await requisicao(rota, 401);
 });
 test('Token inválido, expirado e assinado com outra chave retornam 401', async () => {
   const expirado = jwt.sign({ id: 1 }, process.env.JWT_SECRET, { expiresIn: -1 });

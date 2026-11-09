@@ -94,3 +94,44 @@ test('Período parcial usa a mesma quantidade inclusiva de dias', () => {
   assert.equal(periodoValido(undefined, '2026-11-10'), false);
   assert.deepEqual(mesAtual(new Date('2024-02-15T00:00:00Z')), { inicio: '2024-02-01', fim: '2024-02-29' });
 });
+const { periodoSaude, calcularSaude } = require('../utils/saudeFinanceira');
+
+test('Saúde: sem histórico não inventa renda, percentuais ou saldo inicial', () => {
+  const resultado = calcularSaude([], [], [], '2027-01-15');
+  assert.deepEqual(periodoSaude('2027-01-15'), { inicio: '2026-10-01', fim: '2026-12-31' });
+  assert.deepEqual(resultado.indicadores, { taxaPoupanca: null, comprometimentoCartoes: null, parcelasAVencer: 0 });
+  assert.deepEqual(resultado.projecao.map((p) => p.mes), ['2027-01', '2027-02', '2027-03']);
+  assert.ok(resultado.projecao.every((p) => p.saldoPrevisto === 0));
+  assert.match(resultado.dicas[0], /Não há entradas/);
+});
+
+test('Saúde: médias incluem meses vazios e não duplicam despesas de cartão', () => {
+  const mensais = [{ mes: '2026-12', entradas: '3000.00', saidas: '1500.00', saidas_sem_cartao: '900.00' }];
+  const cartoes = [{ id: 7, dia_fechamento: 25, dia_vencimento: 5 }];
+  const lancamentos = [1, 2, 3].map((n) => ({ tipo: 'saida', fonte_destino_id: 7, data: '2026-12-20',
+    parcela_atual: n, total_parcelas: 3, valor: n === 1 ? '33.34' : '33.33' }));
+  const r = calcularSaude(mensais, cartoes, lancamentos, '2027-01-05');
+  assert.equal(r.rendaMediaMensal, 1000); assert.equal(r.mesesComMovimento, 1);
+  assert.equal(r.indicadores.taxaPoupanca, 0.5);
+  assert.equal(r.indicadores.comprometimentoCartoes, 0.0333);
+  assert.equal(r.indicadores.parcelasAVencer, 100); // Vence hoje também conta.
+  assert.deepEqual(r.projecao.map((p) => p.faturasConhecidas), [33.34, 33.33, 33.33]);
+  assert.deepEqual(r.projecao.map((p) => p.saidas), [333.34, 333.33, 333.33]);
+  assert.deepEqual(r.projecao.map((p) => p.saldoPrevisto), [666.66, 666.67, 666.67]);
+  const depois = calcularSaude(mensais, cartoes, lancamentos, '2027-01-06');
+  assert.equal(depois.indicadores.parcelasAVencer, 66.66);
+});
+
+test('Saúde: alertas derivam dos dados, com parcelas além da janela e meses negativos', () => {
+  const mensais = ['2026-10', '2026-11', '2026-12'].map((mes) => ({ mes, entradas: 100, saidas: 200, saidas_sem_cartao: 80 }));
+  const cartoes = [{ id: 7, dia_fechamento: 25, dia_vencimento: 5 }];
+  const lancamentos = [1, 2, 3, 4].map((n) => ({ tipo: 'saida', fonte_destino_id: 7, data: '2026-12-20',
+    parcela_atual: n, total_parcelas: 4, valor: 50 }));
+  const r = calcularSaude(mensais, cartoes, lancamentos, '2027-01-05');
+  assert.deepEqual(r.indicadores, { taxaPoupanca: -1, comprometimentoCartoes: 0.5, parcelasAVencer: 200 });
+  assert.ok(r.projecao.every((p) => p.saldoPrevisto === -30));
+  assert.ok(r.dicas.some((d) => d.includes('superaram as entradas')));
+  assert.ok(r.dicas.some((d) => d.includes('30%')));
+  assert.ok(r.dicas.some((d) => d.includes('2027-03')));
+  assert.equal(r.aviso, 'Informações educativas; não constituem recomendação financeira profissional.');
+});

@@ -165,6 +165,7 @@ Todas exigem JWT, exceto os dois POSTs de autenticação. GETs de detalhe de cat
 | GET | `/relatorios/categorias` | 200 | inicio e fim obrigatórios |
 | GET | `/relatorios/fontes-destinos` | 200 | inicio e fim obrigatórios |
 | GET | `/relatorios/faturas` | 200 | meses opcional, de 1 a 12, padrão 3 |
+| GET | `/saude-financeira` | 200 | indicadores, projeção e dicas do usuário autenticado |
 
 Erro tem sempre `{ "erro": "..." }`, com `campos` quando aplicável. Status: **400** dados inválidos; **401** token/credenciais inválidos; **404** ausente ou pertencente a outro usuário; **409** duplicidade ou vínculo; **500** falha inesperada, sem SQL ou stack na resposta. Exclusão **204** não tem corpo. Não retornar HTML faz parte dos testes.
 
@@ -218,6 +219,35 @@ IDs/UUID são ilustrativos e o array foi abreviado: a resposta real contém as t
 - RF9 considera a fatura aberta que receberia uma compra hoje, mais as seguintes até completar `meses`. Compra **no fechamento** passa ao mês seguinte. A parcela k avança k−1 meses. Vencimento maior que fechamento fica no mesmo mês; caso contrário, mês seguinte. Dias inexistentes viram último dia do mês, conforme a função oficial.
 - Limite utilizado soma todas as saídas de cartão com vencimento **hoje ou posterior**, incluindo faturas já fechadas não vencidas e parcelas além da janela solicitada. Disponível pode ficar negativo: não há bloqueio de compra por limite no enunciado. Não há entidade de pagamento de fatura; vencimentos passados deixam de compor esse cálculo automaticamente.
 
+## Desafio: saúde financeira
+
+`GET /saude-financeira` exige o mesmo JWT e não recebe ID de usuário. Usa três
+meses **completos anteriores**; mês sem movimento vale zero e a média divide sempre
+por três. `mesesComMovimento` informa a cobertura. Não presume renda não registrada.
+
+| Indicador | Regra |
+|---|---|
+| `taxaPoupanca` | (entradas − saídas) / entradas do último mês completo, pela data dos lançamentos; `null` sem entradas |
+| `comprometimentoCartoes` | Faturas conhecidas do mês atual e dos dois seguintes / (3 × renda média mensal); `null` sem renda média |
+| `parcelasAVencer` | Reais das parcelas de compras com total_parcelas > 1 e vencimento hoje ou depois, inclusive além da projeção |
+
+Taxas são frações: `0.4` significa 40%. A projeção cobre o mês UTC atual e os dois
+seguintes. Repete a média de entradas e de saídas **fora de cartões**, e soma as faturas
+conhecidas de cada mês, usando a mesma função de RF9. Inclui todo o mês, mesmo seus
+vencimentos já passados. Isso evita contar a compra no cartão novamente na média.
+`saldoPrevisto` é o fluxo previsto daquele mês, não saldo bancário acumulado. Não
+estima compras futuras de cartão, inflação, pagamentos efetivos ou renda ausente.
+
+Dicas usam regras explícitas: falta de renda; taxa de poupança negativa; faturas acima
+de 30% da renda projetada (limiar didático escolhido pelo grupo); saldo mensal negativo;
+e valor das parcelas ainda não vencidas. Sem alertas, informa que nenhuma dessas regras
+foi acionada. Não atribui uma nota à pessoa. Toda resposta contém o aviso obrigatório:
+“Informações educativas; não constituem recomendação financeira profissional.”
+
+```powershell
+Api GET '/saude-financeira' $null $token | ConvertTo-Json -Depth 6
+```
+
 ## Testes, apresentação e participação dos integrantes
 
 ```powershell
@@ -239,4 +269,4 @@ Ambos precisam explicar qualquer trecho conforme a política acadêmica. Leia [E
 
 ## Limitações conhecidas
 
-Faltam o ensaio e a contribuição efetiva do segundo integrante, além do envio do link de entrega. O desafio opcional `/saude-financeira` não está implementado; não são reivindicados os 10 pontos extras. A nota depende também da avaliação e da explicação dos alunos. Pagamentos de fatura, transferências, recuperação de senha e revogação de token estão fora do escopo.
+Faltam o ensaio e a contribuição efetiva do segundo integrante, a reprodução independente do README e o envio do link de entrega. O desafio foi implementado e testado; a atribuição dos pontos cabe à professora. Pagamentos de fatura, transferências, recuperação de senha e revogação de token estão fora do escopo.
