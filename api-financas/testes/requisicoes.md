@@ -126,16 +126,33 @@ Api DELETE "/fontes-destinos/$cartaoId" $null $token # 204
 Api GET '/rota-inexistente'                       # 404 JSON
 ```
 
-## 8. Execução automatizada
+## 8. Saúde financeira (22ª rota)
 
 ```powershell
-npm test                    # 22 testes puros e 4 de transação com conexão simulada
+Api GET '/saude-financeira' $null $token | ConvertTo-Json -Depth 8 # 200
+Api GET '/saude-financeira'                                      # 401
+Api GET '/saude-financeira?usuario_id=1' $null $tokenB | ConvertTo-Json -Depth 8 # dados do Bruno
+```
+
+Esperado: `aviso` educativo, três `indicadores`, três meses em `projecao` e `dicas`.
+As taxas são frações e podem ser `null` sem entradas. As fórmulas estão no README.
+A integração usa totais conhecidos e confirma que alterações do Bruno não mudam a
+resposta de outro usuário. O PUT de parcelas e o UUID explícito de 1 vez também são
+exercitados na integração, com casos válidos, inválidos e referências alheias.
+
+## 9. Execução automatizada
+
+```powershell
+npm test                    # 25 testes puros e 4 de transação com conexão simulada
 npm run test:http           # HTTP real, bcrypt e JWT; não precisa MySQL
 $env:EXECUTAR_INTEGRACAO='1'
 $env:TEST_API_URL='http://127.0.0.1:3000'
 npm run test:integracao     # API e MySQL precisam estar rodando; usa novos usuários
 Remove-Item Env:EXECUTAR_INTEGRACAO
 Remove-Item Env:TEST_API_URL
+$env:EXECUTAR_BANCO='1'     # .local/admin.json e .env configurados; não exige API iniciada
+node --test testes/banco.test.js # cria banco isolado, testa restrições e rollback real
+Remove-Item Env:EXECUTAR_BANCO
 ```
 
 Integração cria dois usuários e seus dados por execução; eles ficam disponíveis para inspeção no banco de testes. Não existe rota para excluir usuário no enunciado. Nenhum dado preexistente é apagado. Execute apenas contra sua instância de demonstração. Não interpretar teste **ignorado** como teste aprovado.

@@ -6,7 +6,8 @@ function Api {
         [Parameter(Mandatory=$true)][string]$Metodo,
         [Parameter(Mandatory=$true)][string]$Rota,
         $Dados = $null,
-        [string]$Token = ''
+        [string]$Token = '',
+        [int]$Esperado = 0
     )
     $argumentos = @('-sS', '--connect-timeout', '5', '--max-time', '15', '-X', $Metodo,
         "$script:BaseApi$Rota", '-H', 'Content-Type: application/json', '-w', "`n%{http_code}")
@@ -25,8 +26,23 @@ function Api {
         $status = $saida.Substring($separador + 1).Trim()
         Write-Host "HTTP $status - $Metodo $Rota"
         $corpo = $saida.Substring(0, $separador)
+        if ($Esperado -and [int]$status -ne $Esperado) { throw "Esperado HTTP $Esperado, recebido $status em $Metodo $Rota. $corpo" }
         if ($corpo.Trim()) { return ($corpo | ConvertFrom-Json) }
     } finally {
         if ($arquivo) { Remove-Item -LiteralPath $arquivo -Force }
     }
+}
+
+# CPF ficticio com verificadores validos para repetir o cadastro da demo.
+function Novo-Cpf {
+    do { $digitos = @(1..9 | ForEach-Object { Get-Random -Minimum 0 -Maximum 10 }) }
+    while (($digitos -join '') -match '^(\d)\1{8}$')
+    foreach ($tamanho in @(9, 10)) {
+        $soma = 0
+        for ($i = 0; $i -lt $tamanho; $i++) { $soma += $digitos[$i] * ($tamanho + 1 - $i) }
+        $resto = ($soma * 10) % 11
+        if ($resto -eq 10) { $resto = 0 }
+        $digitos += $resto
+    }
+    return ($digitos -join '')
 }

@@ -74,8 +74,16 @@
 
 37. **Como erros async chegam ao middleware?** Express 5 encaminha Promises rejeitadas. O middleware final tem quatro parâmetros e responde JSON genérico para falhas inesperadas.
 
-38. **Quais testes foram realmente executados?** Passaram 26 testes unitários/transacionais, 6 HTTP e 11 contabilizados pela suíte de integração com MySQL 8.4.13 real. Foram verificados também UNIQUE, CHECK, FK e rollback real em banco isolado. Os detalhes estão em RESULTADOS.md.
+38. **Quais testes foram realmente executados?** Em 09/11/2026 passaram 29 unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real. Os últimos totais incluem seus testes principais. UNIQUE, CHECK, FK e rollback no cadastro e na segunda parcela foram exercitados com MySQL 8.4.13. Detalhes em RESULTADOS.md.
 
-39. **O desafio de saúde financeira foi feito?** Não. A prioridade foi implementar RF1–RF9 e preparar sua validação; a integração ainda exige o ambiente MySQL e dependências.
+39. **O desafio de saúde financeira foi feito?** Sim. Calcula taxa de poupança, comprometimento com cartões e parcelas a vencer; projeta três meses e gera dicas por regras. Usa os próprios dados e sempre retorna aviso educativo.
 
 40. **Como demonstramos autoria e compreensão?** Ambos estudam e explicam todos os trechos, executam testes e fazem contribuições reais em seus próprios commits. Não atribuir commits ou execução a quem não realizou o trabalho.
+
+41. **PUT altera a compra inteira?** Não. Corrige apenas o ID indicado, inclusive data, tipo e referências. Preserva UUID e numeração; não aceita reparcelar. As demais parcelas ficam intactas. Categoria e fonte precisam pertencer ao dono e a categoria deve combinar com o tipo.
+
+42. **Por que parcelas: 1 tem UUID?** O texto oficial descreve parcelamento explícito de 1 a 48 com UUID. Se parcelas não é enviado, é um lançamento simples com grupo nulo.
+
+43. **A projeção soma cartão duas vezes?** Não. Usa média das despesas fora de cartões mais as faturas conhecidas de cada mês. Não prevê novas compras no cartão nem acumula saldo bancário.
+
+44. **Por que taxaPoupanca pode ser null?** Sem entradas no mês, dividir por zero é indefinido. Não inventamos renda nem percentual; a resposta mostra os dados disponíveis.

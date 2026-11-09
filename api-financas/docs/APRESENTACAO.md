@@ -1,150 +1,149 @@
-# Roteiro de apresentação — 9 minutos + 30 segundos de margem
+﻿# Apresentação — 9min15, com 45 segundos de margem
 
-**Integrante A:** Eduardo Caversan da Silva Rocha — RA 2475391 (editável).  
-**Integrante B:** [nome e RA do segundo integrante] (editável).
+**A:** Eduardo Caversan da Silva Rocha — RA 2475391.
+**B:** [preencher nome e RA do segundo integrante].
 
-O roteiro segue os **sete tópicos da seção 11.9**. Os dois integrantes apresentam 4min30 cada. O sétimo tópico é condicional e foi registrado como não implementado; não haverá demonstração do desafio. O roteiro foi planejado para 9 minutos, mas **o ensaio real ainda está pendente**.
+Sete tópicos oficiais, incluindo o desafio implementado. A apresenta 4min45 e B
+4min30. Este é um planejamento; **o ensaio oral dos integrantes não foi realizado**.
+A execução técnica de comandos não comprova os critérios 16–18 da apresentação.
 
-## Preparação antes de iniciar o cronômetro
+## Antes da apresentação
 
-- Instalar e validar MySQL, npm e a API; executar testes HTTP e integração, corrigir falhas antes da apresentação. Ler RESULTADOS.md para não confundir o estado atual com validação concluída.
-- Usar exclusivamente banco local de demonstração. Para a execução ao vivo de schema/seed, preparar uma instância sem as tabelas `api_financas`; ambos os scripts são importados uma vez. Não apagar dados pessoais. Se o banco já estiver carregado, organizar uma nova instância de demonstração com antecedência.
-- Deixar `.env` configurado e **fora da tela**. Verificar senha do MySQL, porta e usuário antes. Dependências podem estar instaladas para que `npm install` apenas confirme a instalação rapidamente; não depender do download ao vivo.
-- Abrir editor em `schema.sql`, `Usuario.js`, `Lancamento.js`, `routes/lancamentos.js` e `middleware/auth.js`.
-- Abrir dois terminais na pasta api-financas. Primeiro para banco/API; segundo para requisições. Carregar `. .\testes\comandos.ps1` no segundo. Deixar CHEATSHEET ao lado, com os blocos prontos para copiar.
-- Não cadastrar previamente `apresentacao@example.com`/CPF `12345678909` no banco preparado. Não executar o roteiro completo de testes manuais nele antes da gravação.
-- Reservar a contribuição real do integrante B: validar instalação e integração, revisar estes comandos e registrar correções em seus próprios commits. Ambos devem estudar todo o código.
+- Ler README e executar os testes. Iniciar MySQL antes do cronômetro: portátil em
+  127.0.0.1:3307, conforme AMBIENTE-LOCAL; outra instalação usa a porta configurada.
+- Deixar `.env` e `.local/admin.json` configurados e fora do projetor. O auxiliar
+  preparar-demo usa esses arquivos sem imprimir segredos. Não apagar o banco atual.
+- Fechar a API anterior (Ctrl+C). Abrir dois terminais na pasta `api-financas`:
+  um para preparar banco/iniciar nodemon, outro para os blocos do CHEATSHEET.
+- Dependências já podem estar instaladas; `npm install` será executado ao vivo.
+  Não contar com download durante a apresentação.
+- Abrir schema.sql, Usuario.js, routes/lancamentos.js, middleware/auth.js,
+  Relatorio.js e utils/faturas.js. Deixar os blocos 2–6 do CHEATSHEET prontos.
+- A demonstração cadastra usuário fictício novo e obtém todos os IDs pela API.
+  Não precisa reservar CPF nem lembrar IDs. Ana/Bruno do seed ficam intactos.
 
-## 1. Código-fonte — 00:00 a 01:15 — Integrante A
+## 1. Código-fonte — 00:00–01:05 — A
 
-**Abrir:** árvore do projeto; `database/schema.sql`; `models/Usuario.js`; `routes/lancamentos.js`; `middleware/auth.js`.
+**Abrir:** árvore, `database/schema.sql`, `models/Usuario.js`,
+`routes/lancamentos.js` e `middleware/auth.js`.
 
-**Comando/ação:** mostrar a árvore no editor, destacar `UNIQUE`, FK e `CHECK`; mostrar `Usuario.cadastrar`, uma rota com `res.status(...).json(...)` e o middleware `expressjwt`.
+**Ação:** mostrar quatro tabelas, UNIQUE/CHECK/FK; seguir a rota até a classe e a
+transação. Destacar `require`, `Router` e `req.auth.id`.
 
-**Resultado esperado:** mostrar as quatro entidades e a sequência rota → modelo → banco.
+**Resultado esperado:** responsabilidades claras e nenhuma senha no código.
 
-**Fala sugerida:** “Usamos a mesma organização da loja de carros. A rota valida HTTP, a classe executa SQL parametrizado e utils fazem cálculos. O cadastro usa uma conexão do pool para gravar usuário, categorias e conta; só confirma se tudo funcionar.”
+**Fala:** “A rota valida HTTP, o modelo executa SQL e utils calculam. O cadastro
+confirma usuário, nove categorias e conta juntos; se falhar, executa rollback.”
 
-**Conceitos:** CommonJS, classes, Router, integridade relacional, transação, middleware.
+**Conceitos:** CommonJS, classe, Router, integridade relacional e transação.
 
-## 2. Execução pela linha de comando — 01:15 a 02:15 — Integrante B
+## 2. Linha de comando — 01:05–02:00 — B
 
-**Terminal 1:**
+**Terminal 1, banco iniciado:**
 
 ```powershell
-mysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/schema.sql"
-mysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/seed.sql"
 npm install
+node testes/preparar-demo.js
+$env:DB_NAME = Get-Content .local/demo-banco.txt
 npm run dev
 ```
 
-**Resultado esperado:** schema e seed sem erro; npm confirma dependências; nodemon inicia a API. Digitar a senha solicitada sem mostrá-la. O login da próxima etapa confirma conexão com banco.
+**Abrir:** `testes/preparar-demo.js`, `database/schema.sql` e `database/seed.sql`.
+**Esperado:** importação dos dois scripts em banco novo, npm sem erro, nodemon ativo.
+O auxiliar apenas adapta o nome do banco e concede privilégios; a API usa a conta
+restrita do `.env`. Não depende do cliente mysql no PATH. A instalação convencional
+com caminho explícito está no README. Não reimportar scripts sobre tabelas existentes.
 
-**Fala sugerida:** “O schema garante regras mesmo fora da API; o seed contém dois usuários fictícios e três meses de lançamentos. As configurações locais vêm do dotenv. Nodemon reinicia durante o desenvolvimento.”
+**Fala:** “Importamos o schema e os três meses do seed pelo driver mysql2. A variável
+do terminal seleciona o banco novo sem sobrescrever .env. Nodemon reinicia a API.”
 
-**Conceitos:** cliente MySQL, NPM, dependencies/devDependencies, configuração por ambiente.
+**Conceitos:** execução por CLI, scripts SQL, npm, devDependencies e dotenv.
 
-## 3. Cadastro e unicidade — 02:15 a 03:30 — Integrante A
+## 3. Cadastro e unicidade — 02:00–03:05 — A
 
-**Terminal 2:**
+**Executar:** bloco **2. Cadastro e duplicidades** do CHEATSHEET no terminal 2.
+São três POSTs `/auth/cadastro`, com e-mail em maiúsculas e CPF pontuado nas repetições.
+**Abrir:** `routes/auth.js` e as restrições de `usuarios` no schema.
 
-```powershell
-Api POST '/auth/cadastro' @{nome='Apresentação'; email='apresentacao@example.com'; cpf='12345678909'; senha='Teste1234'}
-Api POST '/auth/cadastro' @{nome='Outro'; email='APRESENTACAO@EXAMPLE.COM'; cpf='39053344705'; senha='Teste1234'}
-Api POST '/auth/cadastro' @{nome='Outro'; email='outra.apresentacao@example.com'; cpf='123.456.789-09'; senha='Teste1234'}
-```
+**Esperado:** 201, 409 com `campos.email`, 409 com `campos.cpf`; nenhuma senha/hash.
 
-**Resultado esperado:** 201, depois 409 com `campos.email`, depois 409 com `campos.cpf`. Nenhuma resposta expõe hash.
+**Fala:** “Normalizamos antes de gravar. UNIQUE garante a regra mesmo com cadastros
+simultâneos. Bcrypt guarda hash, e o retorno seleciona apenas campos públicos.”
 
-**Fala sugerida:** “Normalizamos e-mail e CPF antes de inserir. O UNIQUE do banco impede duplicidade inclusive se duas requisições chegarem juntas. Não dependemos de SELECT anterior para garantir isso. A senha é hash bcrypt.”
+**Conceitos:** validação, normalização, condição de corrida, bcrypt e status HTTP.
 
-**Conceitos:** validação, normalização, unicidade, condição de corrida, códigos HTTP.
+## 4. Login e proteção — 03:05–04:10 — B
 
-## 4. Login e proteção — 03:30 a 04:45 — Integrante B
+**Executar:** bloco **3. Login e isolamento** do CHEATSHEET: login, me, listagens,
+GET sem token e GET/PUT/DELETE do lançamento do Bruno com token do novo usuário.
+**Abrir:** `middleware/auth.js` e `Lancamento.buscar/atualizar/excluir`.
 
-**Terminal 2:**
+**Esperado:** logins 200; sem token 401; três acessos cruzados 404; dono legítimo 200.
+Não mostrar o token inteiro: os comandos o guardam em variável.
 
-```powershell
-$token = (Api POST '/auth/login' @{email='ana@example.com'; senha='p@5sw0rd'}).token
-$tokenB = (Api POST '/auth/login' @{email='bruno@example.com'; senha='p@5sw0rd'}).token
-Api GET '/lancamentos'
-Api GET '/lancamentos/12' $null $token
-Api PUT '/lancamentos/12' @{tipo='entrada'; descricao='Tentativa'; valor=1; data='2026-09-05'; categoriaId=1; fonteDestinoId=1} $token
-Api DELETE '/lancamentos/12' $null $token
-Api GET '/lancamentos/12' $null $tokenB
-```
+**Fala:** “Express-jwt verifica assinatura e expiração de uma hora. O token define
+quem sou; WHERE usuario_id define quais registros posso acessar.”
 
-**Resultado esperado:** dois logins 200; 401 sem token; três 404 nas operações cruzadas; 200 para Bruno.
+**Conceitos:** autenticação, autorização, JWT e filtros parametrizados.
 
-**Fala sugerida:** “JWT dura uma hora. Express-jwt verifica a assinatura e entrega req.auth.id. Além da autenticação, filtramos o dono no SQL. O ID 12 pertence ao Bruno; para Ana ele não existe.”
+## 5. CRUD e parcelamento — 04:10–06:25 — B
 
-**Conceitos:** bcrypt.compare, assinatura/expiração, autenticação × autorização, isolamento.
+**Executar:** bloco **4. CRUD e parcelamento** do CHEATSHEET. Cria, consulta e edita
+categoria/cartão; cria compra de 100 em três vezes; consulta/edita a primeira parcela;
+tenta categoria incompatível e exclusão vinculada. As exclusões bem-sucedidas ficam
+no próximo tópico para manter os dados disponíveis nos relatórios.
+**Abrir:** `models/Lancamento.js`, `utils/parcelas.js`.
 
-## 5. CRUD e parcelamento — 04:45 a 07:00 — Integrante B
+**Esperado:** criações 201, leituras/edições 200, validação 400, vínculo 409.
+Parcelas 33,34 + 33,33 + 33,33, mesma data e UUID.
 
-**Terminal 2:** copiar o bloco “CRUD, parcela e fatura” do CHEATSHEET até o DELETE de categoria (409), deixando a consulta de faturas para o próximo tópico. O bloco contém:
+**Fala:** “Dividimos 10 mil centavos; o resto fica na primeira. As datas SQL continuam
+iguais na criação. PUT corrige somente uma parcela, preservando grupo e numeração.
+A exclusão coletiva usa UUID e dono. Não há reprocessamento automático da compra.”
 
-1. POST categoria e cartão (201).
-2. PUT dos dois cadastros (200).
-3. POST compra de 100 em 3 parcelas, com data atual (201).
-4. GET e PUT da primeira parcela (200).
-5. POST saída com categoria Salário (400).
-6. DELETE categoria ainda vinculada (409).
+**Conceitos:** verbos REST, centavos inteiros, transação, FK e identidade do recurso.
 
-Para exibir também a leitura dos cadastros:
+## 6. Relatórios e término do CRUD — 06:25–08:30 — A
 
-```powershell
-Api GET "/categorias/$($cat.id)" $null $token
-Api GET "/fontes-destinos/$($cartao.id)" $null $token
-$compra | ConvertTo-Json -Depth 6
-```
+**Executar:** bloco **5. Relatórios e exclusões** do CHEATSHEET.
+**Endpoints:** `/relatorios/categorias`, `/relatorios/fontes-destinos` (outubro/2026)
+e `/relatorios/faturas?meses=3`; DELETE do grupo, categoria e cartão.
+**Abrir:** SUM/GROUP BY em `models/Relatorio.js` e `<` em `utils/faturas.js`.
 
-**Resultado esperado:** parcelas 33.34, 33.33, 33.33 com mesmo UUID e mesma data da compra. Categoria e cartão renomeados; erros explicativos 400/409.
+**Esperado:** Ana: entradas 5200, saídas 5500, Alimentação 1000 vs 800 (25%), conta
+corrente 2700. No cartão novo: cada parcela em uma referência consecutiva, usado
+100, disponível 1100. Três exclusões finais 204. Os usuários separados evitam
+que a compra ao vivo modifique os totais conhecidos do seed.
 
-**Fala sugerida:** “Dividimos 10 mil centavos por três: a primeira parcela recebe o resto. Não mudamos a data da compra no banco; faturas usam o número da parcela para calcular os meses. A FK impede excluir a categoria que ainda é usada.”
+**Fala:** “MySQL agrega os dados; convertemos DECIMAL para número JSON. Relatórios
+usam data da compra; faturas calculam vencimento pela parcela. Compra no fechamento
+entra no próximo ciclo. Limite inclui todas as parcelas ainda não vencidas.”
 
-**Conceitos:** POST/GET/PUT/DELETE, validação de tipo, centavos inteiros, transação, FK. As exclusões bem-sucedidas ficam ao final do tópico seguinte para preservar os dados dos relatórios.
+**Conceitos:** SUM/GROUP BY, percentuais, calendário UTC e integridade referencial.
 
-## 6. Relatórios — 07:00 a 09:00 — Integrante A
+## 7. Desafio — 08:30–09:15 — A (30s), B (15s)
 
-**Terminal 2:**
+**Executar:** bloco **6. Saúde financeira** do CHEATSHEET: GET `/saude-financeira`.
+**Abrir:** `utils/saudeFinanceira.js`, se necessário.
 
-```powershell
-Api GET '/relatorios/categorias?inicio=2026-10-01&fim=2026-10-31' $null $token | ConvertTo-Json -Depth 10
-Api GET '/relatorios/fontes-destinos?inicio=2026-10-01&fim=2026-10-31' $null $token | ConvertTo-Json -Depth 10
-$previsao = Api GET '/relatorios/faturas?meses=3' $null $token
-$previsao.cartoes | Where-Object { $_.id -eq $cartao.id } | ConvertTo-Json -Depth 10
-```
+**Esperado:** aviso educativo, três indicadores, três linhas de projeção e dicas.
+Valores dependem da data; não prometer números fixos para o seed antigo.
 
-**Resultado esperado:** no seed de outubro, entradas 5200; saídas 5500; Alimentação cresce de 800 para 1000 (25%); conta corrente tem saldo 2700. O cartão novo mostra 33.34, 33.33 e 33.33 em três referências consecutivas, limite utilizado 100, disponível 1100. Se a demonstração for em outubro, o relatório também incluirá a compra ao vivo: mostrar o relatório antes do item 5 ou explicar essa inclusão.
+**Fala de A:** “Usamos os três meses completos anteriores. Sem renda, a razão é
+null. A projeção soma média das despesas fora do cartão e faturas conhecidas;
+assim não conta a compra duas vezes. Saldo previsto é mensal, não saldo bancário.”
+**Fala de B:** “Dicas vêm de regras documentadas, como saldo negativo e comprometimento
+acima de 30%. São informações educativas, não recomendação profissional.”
 
-**Abrir:** `models/Relatorio.js` no `SUM`/`GROUP BY` e `utils/faturas.js` no operador `dia < fechamentoDoMes`.
+**Conceitos:** agregação, funções puras, condicionais, limites de uma projeção.
 
-**Fala sugerida:** “O banco soma por categoria e por fonte. O resumo usa data da compra. As faturas usam fechamento e vencimento, e compra no dia do fechamento passa ao próximo mês. O limite inclui todas as parcelas ainda não vencidas.”
+## Ensaio dos integrantes — pendente
 
-**Concluir CRUD com exclusões:**
+- [ ] Ambos reproduziram o README e explicaram todos os trechos.
+- [ ] Executaram os sete tópicos, incluindo instalação, transições e importação.
+- [ ] Tempo oral medido: ___min ___s, data: ___, participantes: ___.
+- [ ] Duração abaixo de 10 minutos; 09:15–10:00 fica para pequenos atrasos.
+- [ ] Identificação, contribuições reais e commits do outro integrante preenchidos.
+- [ ] Repositório remoto/link de entrega providenciados pelo responsável.
 
-```powershell
-Api DELETE "/lancamentos/${id}?todasParcelas=true" $null $token
-Api DELETE "/categorias/$($cat.id)" $null $token
-Api DELETE "/fontes-destinos/$($cartao.id)" $null $token
-```
-
-**Resultado esperado:** três 204. Todos os integrantes devem saber explicar por que os deletes agora funcionam.
-
-**Conceitos:** agregação SQL, percentuais, DECIMAL → Number, funções puras, datas UTC, integridade referencial.
-
-## 7. Desafio, se implementado — não se aplica — 0 segundos
-
-`GET /saude-financeira` não foi implementado. Nenhum comando ou ponto extra é reivindicado. Não demonstrar endpoint inexistente.
-
-**Margem:** 09:00 a 09:30 para navegação ou pequena demora. **Limite absoluto:** 10 minutos. Perguntas da professora: seguir orientação dela sobre o tempo.
-
-## Checklist do ensaio
-
-- [ ] Banco novo carregou os dois scripts sem erros.
-- [x] Dependências e lockfile gerados; teste HTTP e integração passaram.
-- [ ] Ambos executaram o roteiro inteiro e explicaram todos os arquivos.
-- [ ] Total cronometrado abaixo de 10 minutos, sem contar com improvisação.
-- [ ] Commits reais dos dois integrantes e link do repositório preparados.
-- [ ] Nenhum segredo real mostrado ou versionado.
+Não marcar ensaio ou domínio como verificado por causa de testes automatizados.

@@ -104,9 +104,15 @@ Autenticar um usuário não basta para autorizar acesso a qualquer ID. O `WHERE 
 
 `utils/parcelas.js` recebe 100 e 3. Converte para 10000 centavos, calcula base inteira 3333 e resto 1. Resultado: `[33.34, 33.33, 33.33]`. Se não houver ao menos um centavo por parcela, rejeita, pois o banco exige valor positivo.
 
-`Lancamento.criar` gera UUID com `crypto.randomUUID()` para compras com mais de uma parcela e grava um INSERT por parcela na mesma transação. Todas recebem a data original. `parcela_atual` muda de 1 até N; `total_parcelas` e UUID são comuns.
+`Lancamento.criar` gera UUID com `crypto.randomUUID()` quando `parcelas` é enviado, inclusive 1, e grava um INSERT por parcela na mesma transação. Omitir o campo cria lançamento simples, com grupo nulo. Na criação, todas recebem a data original. `parcela_atual` muda de 1 até N; `total_parcelas` e UUID são comuns.
 
 Excluir com `todasParcelas=true` procura o grupo pelo ID **e dono**, depois exclui o grupo também filtrando o dono. Sem esse parâmetro, remove só o registro escolhido. Alterar valor de uma parcela altera o total atual da compra; não há campo separado de valor original. Reparcelamento não é feito por PUT.
+
+PUT pode corrigir descrição, valor, data, tipo, categoria e fonte daquele ID, mantendo
+grupo/numeração e as demais parcelas. Verifica primeiro o dono, depois as referências
+e a compatibilidade de tipo, na mesma transação. Relatórios usam os campos corrigidos;
+se deixar de ser saída em cartão, o registro deixa de entrar nas faturas. É a semântica
+individual do recurso, documentada em REVISAO-FINAL.md, sem atualização implícita do grupo.
 
 ## 9. Datas e faturas
 
@@ -139,3 +145,19 @@ Express 5 encaminha rejeições async automaticamente, mas transações ainda pr
 ## 12. O que estudar e validar de verdade
 
 Ambos os integrantes devem executar cada rota, explicar os arrays de parâmetros SQL, seguir uma transação até o rollback e calcular uma fatura manualmente. O enunciado permite apoio de IA, mas exige compreensão e autoria efetiva. A validação MySQL foi realizada e registrada em RESULTADOS.md; esta documentação não substitui o ensaio. Consulte a auditoria antes de declarar qualquer requisito concluído.
+
+## 13. Saúde financeira
+
+`Relatorio.saudeFinanceira` agrega entradas, saídas e despesas fora de cartão nos três
+meses completos anteriores, com SUM/GROUP BY e filtro de usuário. `dadosCartoes` é
+compartilhado com RF9 para não duplicar sua consulta. `calcularSaude`, em utils, recebe
+esses dados e a data de referência; não faz SQL nem altera lançamentos.
+
+A taxa de poupança usa o último mês completo. Comprometimento compara faturas de três
+meses com três rendas médias. Parcelas a vencer inclui vencimento hoje ou posterior,
+mesmo fora da projeção. Sem renda, as razões são `null`. Os meses vazios entram como
+zero na média. A projeção repete média das entradas e saídas fora do cartão, somando
+faturas conhecidas: despesas do cartão não entram novamente na média. Saldo é mensal,
+não acumulado. Regras `if` geram dicas; limiar de 30% e limitações estão no README.
+O aviso educativo aparece em toda resposta. Testes puros cobrem virada de ano, ausência
+de renda, centavos, meses negativos e parcelas além da janela; integração confere dono.

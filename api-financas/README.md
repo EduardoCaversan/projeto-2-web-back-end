@@ -7,7 +7,7 @@ Projeto acadêmico de **Programação Web Back-end**, implementado conforme [o e
 
 A API cadastra usuários, autentica com JWT, mantém categorias, fontes/destinos e lançamentos privados, divide compras em parcelas e retorna relatórios e faturas em JSON. O objetivo é aplicar Express, classes de modelo, MySQL, transações e autenticação estudados na disciplina. Não há interface gráfica.
 
-**Estado da entrega:** RF1–RF9 implementados e exercitados com MySQL 8.4.13 real. Passaram 26 testes unitários/transacionais, 6 testes HTTP e a suíte de integração (11 testes contabilizados pelo Node). UNIQUE, CHECK, FK e rollback também foram verificados diretamente. Dependências instaladas, lockfile versionado e .env local pronto. Veja [resultados](docs/RESULTADOS.md), [auditoria](docs/CONFORMIDADE.md) e [como iniciar o ambiente já preparado](docs/AMBIENTE-LOCAL.md).
+**Estado técnico:** RF1–RF9 e desafio implementados. Validação em 09/11/2026: 29 testes unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real aprovados, sem ignorados. Os dois últimos totais incluem seus testes principais. Apresentação, contribuição do segundo integrante e envio do link continuam pendentes. Veja [resultados](docs/RESULTADOS.md), [conformidade](docs/CONFORMIDADE.md) e [ambiente local pronto](docs/AMBIENTE-LOCAL.md).
 
 ## Tecnologias e organização
 
@@ -18,10 +18,10 @@ api-financas/
 ├── database/   connection.js, schema.sql, seed.sql
 ├── middleware/ auth.js
 ├── models/     Usuario.js, Categoria.js, FonteDestino.js, Lancamento.js, Relatorio.js
-├── routes/     auth.js, categorias.js, fontesDestinos.js, lancamentos.js, relatorios.js
-├── utils/      cpf.js, validacao.js, datas.js, parcelas.js, faturas.js
+├── routes/     auth.js, categorias.js, fontesDestinos.js, lancamentos.js, relatorios.js, saudeFinanceira.js
+├── utils/      cpf.js, validacao.js, datas.js, parcelas.js, faturas.js, saudeFinanceira.js
 ├── testes/     requisicoes.md, comandos.ps1, unidades.test.js,
-│               transacoes.test.js, http.test.js, integracao.test.js
+│               transacoes.test.js, http.test.js, integracao.test.js, banco.test.js, preparar-demo.js
 ├── docs/       CONFORMIDADE.md, RESULTADOS.md, CHEATSHEET.md,
 │               APRESENTACAO.md, EXPLICACAO-CODIGO.md, PERGUNTAS-BANCA.md
 ├── .env.example
@@ -257,13 +257,23 @@ npm run test:http
 $env:EXECUTAR_INTEGRACAO='1'
 npm run test:integracao
 Remove-Item Env:EXECUTAR_INTEGRACAO
+# Opcional administrativo: MySQL iniciado, .env e .local/admin.json configurados
+$env:EXECUTAR_BANCO='1'
+node --test testes/banco.test.js
+Remove-Item Env:EXECUTAR_BANCO
 ```
 
 `npm test` não precisa de dependências nem de MySQL. `test:http` exige `npm install`, usa porta efêmera e verifica Express/JWT/bcrypt reais sem consultas ao banco. `test:integracao` usa API real em `http://127.0.0.1:3000` (ou `TEST_API_URL`) e cria dois usuários fictícios por execução. Os dados ficam no banco de demonstração; a suíte não apaga dados anteriores. O teste é explicitamente ignorado sem a variável de habilitação.
 
+`banco.test.js` cria um banco isolado com schema/seed e testa UNIQUE, CHECK, FK e
+falhas por triggers no cadastro e na segunda parcela. Remove as triggers e fecha
+as conexões; mantém o banco fictício para inspeção, sem alterar o banco da API.
+Requer administrador capaz de criar banco/triggers e conceder privilégios; formato
+do arquivo privado em [AMBIENTE-LOCAL](docs/AMBIENTE-LOCAL.md). Sem habilitação, é ignorado.
+
 Em ambiente com restrição de subprocessos, substitua o executor por `node testes/unidades.test.js` e `node testes/transacoes.test.js`. O mesmo vale para os outros dois arquivos, respeitando seus pré-requisitos.
 
-Para demonstrar: primeiro configure banco e API; siga [CHEATSHEET](docs/CHEATSHEET.md) e ensaie [APRESENTACAO](docs/APRESENTACAO.md). O roteiro distribui 4min30 por integrante, com 30 segundos de margem. Existem comandos de **todas as 21 rotas** em [requisicoes.md](testes/requisicoes.md).
+Para demonstrar: configure banco e API; siga [CHEATSHEET](docs/CHEATSHEET.md) e ensaie [APRESENTACAO](docs/APRESENTACAO.md). O roteiro tem 9min15 (A: 4min45, B: 4min30), com 45 segundos de margem. São **22 rotas**, cobertas em [requisicoes.md](testes/requisicoes.md). O preparo reproduzível importa schema/seed em banco novo: `node testes/preparar-demo.js`, seguido de `$env:DB_NAME = Get-Content .local/demo-banco.txt` e `npm run dev`. Configure antes o arquivo administrativo privado conforme AMBIENTE-LOCAL.
 
 Ambos precisam explicar qualquer trecho conforme a política acadêmica. Leia [EXPLICACAO-CODIGO](docs/EXPLICACAO-CODIGO.md) e [PERGUNTAS-BANCA](docs/PERGUNTAS-BANCA.md). O segundo integrante deve realizar trabalho real: instalar/validar MySQL, executar integração, corrigir resultados, revisar documentação e fazer seus próprios commits. Não foram criados commits em seu nome. A publicação no Git remoto e o envio do link da entrega não foram executados.
 
