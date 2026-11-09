@@ -1,90 +1,97 @@
-# Checklist de conformidade
+﻿# Conformidade final — 09/11/2026
 
-Aluno: Eduardo Caversan da Silva Rocha — RA 2475391.
+Eduardo Caversan da Silva Rocha — RA 2475391. Segundo integrante: **[nome e RA pendentes]**.
+Fonte de verdade: [enunciado, seções 11.1–11.12](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html).
+Leitura integral conferida contra o fonte oficial `12-projeto-api-controle-financeiro.Rmd`.
+O relatório independente fornecido pelo usuário foi confrontado com o código atual.
+O checklist inicial permanece no commit `1dc709c`; as mudanças finais estão em REVISAO-FINAL.md.
 
-Fonte de verdade: https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html
-Leitura integral das seções 11.1–11.12 e referências em 08/11/2026, via arquivo publicado `docs/projeto-api-financas.html` do repositório `costasilvati/IntroNodeJS` (livro gerado em 06/11/2026). Consultados os capítulos MySQL, JWT e loja de carros. Fonte Rmd: blob `4ce9499830f2da9ba114722441a96a27dde955d9`.
+**T** = testado automaticamente nesta revisão; **I** = inspecionado;
+**M** = validado manualmente por integrante (nenhuma nova evidência apresentada);
+**NV** = não verificado, depende de execução humana. Conexão simulada não comprova MySQL.
+“Concluído” descreve o requisito nos cenários exercitados, sem atribuir nota definitiva.
+“Parcial” indica parte técnica pronta com validação restante; “pendente” indica falta de evidência.
 
-O checklist inicial precedeu o código e foi commitado em 1dc709c. Esta auditoria foi atualizada em 08/11/2026. **Concluído** exige evidência; **parcial** indica implementação sem toda a validação; **pendente** indica trabalho ainda não feito. Conexão simulada não equivale a MySQL real.
+## RF1–RF9
 
 | Requisito | Descrição | Arquivos responsáveis | Teste correspondente | Status | Evidência |
 |---|---|---|---|---|---|
-| RF1 | Validações, normalização, bcrypt, UNIQUE, 409 por campo, transação com categorias e conta | models/Usuario.js, routes/auth.js, utils/cpf.js, schema.sql | unidades/transacoes; cadastro em integracao | concluído | Cadastro/duplicidades/validações passaram na integração; bcrypt no HTTP; rollback real confirmado com trigger de falha em banco isolado. |
-| RF2 | Login genérico; JWT HS256 1h; /auth/me; UnauthorizedError | routes/auth.js, middleware/auth.js, server.js | http: tokens; integracao: login/me | concluído | 6 testes HTTP aprovados, incluindo tokens ausentes/expirados/inválidos; login/me/expiração aprovados na integração. |
-| RF3 | Dono de req.auth.id; referências do mesmo usuário; 404 cruzado | Todos os models/routes | integracao: GET/PUT/DELETE cruzados, referências e relatórios | concluído | GET/PUT/DELETE cruzados, referências de outro dono e relatórios isolados passaram na integração real. |
-| RF4 | CRUD categorias, filtro, tipos, duplicidade, vínculos | models/Categoria.js, routes/categorias.js | integracao: CRUD categorias e vínculos | concluído | CRUD, filtro, duplicidade, isolamento e vínculos aprovados na integração real. |
-| RF5 | CRUD fontes, tipos, cartão obrigatório, dias 1–31, limite positivo, duplicidade | models/FonteDestino.js, routes/fontesDestinos.js | integracao: CRUD fontes e cartão | concluído | CRUD, regras do cartão, duplicidade e isolamento aprovados na integração real. |
-| RF6 | CRUD, validações, filtros, mês atual, 20/página, resumo integral, parcelas 1–48, mesma data/UUID, resto na primeira, exclusão coletiva | models/Lancamento.js, routes/lancamentos.js, utils/parcelas.js | unidades/transacoes: parcelas; integracao: CRUD/filtros/páginas/exclusão | concluído | CRUD, filtros, 21 registros em páginas 20+1, resumo, 100/3, data/UUID e exclusões passaram com MySQL real. |
-| RF7 | SUM/GROUP BY, percentuais, comparação, variação, ordenação, JSON numérico | models/Relatorio.js, routes/relatorios.js, utils/datas.js | unidades: períodos; integracao: totais conhecidos | concluído | Totais, anterior, variação e valores numéricos aprovados com agregações reais; períodos aprovados nos testes puros. |
-| RF8 | Entradas por fonte, saídas por destino, saldo das contas | models/Relatorio.js, routes/relatorios.js | integracao: saldo conhecido e isolamento | concluído | Saldo conhecido e isolamento aprovados na integração com MySQL. |
-| RF9 | Fatura aberta/futuras, fechamento, dias curtos, virada, parcelas, limites, meses 1–12 | utils/faturas.js, models/Relatorio.js, routes/relatorios.js | unidades: tabela oficial/fronteiras; integracao: faturas 100/3 | concluído | 12 casos de calendário e limites aprovados; endpoint real confirmou 3 faturas, utilizado 100 e disponível 900. |
+| RF1 | Campos, CPF, senha, normalização, bcrypt, UNIQUE, 409 e transação | routes/auth.js, models/Usuario.js, utils/cpf.js, schema.sql | unidades, http, integracao; banco: falha na categoria | concluído | T: cadastro, duplicidades normalizadas, zero usuário residual após erro real, recuperação com nove categorias |
+| RF2 | Login, compare, JWT 1h, me e erros 401 | routes/auth.js, middleware/auth.js, server.js | http; integracao: login/me | concluído | T: assinatura inválida, expiração, token ausente, login correto/incorreto e exp-iat=3600 |
+| RF3 | Identidade pelo token, propriedade e 404 cruzado | models e routes de todos os recursos | integracao: leitura/PUT/DELETE e referências alheias, relatórios, saúde | concluído | T: acesso cruzado recusado, dono forjado ignorado, respostas sem hash; I: filtros SQL |
+| RF4 | CRUD, tipos, filtro, duplicidade e vínculos | Categoria.js, routes/categorias.js | integracao: categorias/vínculos | concluído | T: CRUD, filtros, duplicidade por usuário e 409 vinculado |
+| RF5 | CRUD, tipos, cartão com dias/limite | FonteDestino.js, routes/fontesDestinos.js | integracao: fontes/cartões | concluído | T: CRUD, duplicidade, posse, campos inválidos e exclusão vinculada |
+| RF6 | CRUD, filtros, mês atual, 20/página, resumo, parcelas 1–48 e exclusões | Lancamento.js, routes/lancamentos.js, utils/parcelas.js | unidades; integracao: CRUD, páginas, PUT, UUID; banco: segunda parcela | concluído | T: 100/3, 20+1, resumo integral, UUID para 1 explícito, edição de todos os campos, demais parcelas intactas, rollback real e exclusão coletiva |
+| RF7 | SUM/GROUP BY, percentuais, comparação, variação, ordem e números | Relatorio.js, routes/relatorios.js, utils/datas.js | unidades: períodos; integracao: totais; CHEATSHEET: seed | concluído | T: totais conhecidos, comparação, ordenação e 25% em Alimentação; I: divisão por zero documentada |
+| RF8 | Entradas/fontes, saídas/destinos e saldo por conta | Relatorio.js, routes/relatorios.js | integracao; CHEATSHEET | concluído | T: saldo conhecido, isolamento e conta corrente do seed com 2700 em outubro |
+| RF9 | Fatura aberta, fronteiras, parcelas futuras, limites e meses 1–12 | utils/faturas.js, Relatorio.js, routes/relatorios.js | unidades: tabela oficial e calendário; integracao; CHEATSHEET | concluído | T: quatro exemplos oficiais, fevereiro/bissexto/dia31/virada, limite além da janela, 33,34/33,33/33,33 em faturas consecutivas |
+| Desafio | Três indicadores, projeção mensal, dicas, aviso e isolamento | utils/saudeFinanceira.js, Relatorio.js, routes/saudeFinanceira.js | unidades: saúde; http; integracao: saúde | concluído | T: ausência de renda, meses vazios, virada, saldo negativo, limite da projeção, não duplicação de cartão e isolamento |
 
-## Critérios de avaliação (11.10)
+## Critérios oficiais — pontos possíveis, não notas atribuídas
 
-| Critério | Pontos | Arquivos/teste/evidência | Status |
+| Nº / critério | Máximo | Arquivos e evidência | Status |
 |---|---:|---|---|
-| 1. Cadastro e transação | 6 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 2. Unicidade e normalização | 6 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 3. bcrypt/JWT/segredo | 7 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 4. Proteção e isolamento | 6 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 5. CRUD categorias/fontes | 8 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 6. CRUD lançamentos | 9 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 7. Filtros/paginação/resumo | 4 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 8. Parcelamento/exclusão | 4 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 9. Categorias/comparação | 7 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 10. Fontes/destinos | 5 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 11. Faturas/limites | 8 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 12. Organização | 4 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 13. HTTP e erros | 4 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 14. SQL/restrições | 4 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 15. Arquivos/documentação | 3 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 16. Explicação pelos integrantes | 5 | Guia e 40 perguntas disponíveis; estudo e explicação dependem dos alunos | pendente |
-| 17. Execução pela linha de comando | 5 | Evidência: implementação inspecionada, dependências/lockfile instalados, testes HTTP/MySQL e restrições reais aprovados (RESULTADOS.md) | concluído |
-| 18. Demonstração até 10 minutos | 5 | Roteiro de 9 minutos + 30s, divisão 4min30/4min30; ensaio pendente | parcial |
-| Desafio opcional | +10 | Não implementado antes da validação obrigatória | pendente |
+| 1. Cadastro e transação | 6 | T: Usuario.js + cadastro HTTP e rollback real em banco.test.js | concluído |
+| 2. Unicidade/normalização | 6 | T: routes/auth.js, UNIQUE e duplicidades normalizadas na integração | concluído |
+| 3. bcrypt/JWT/segredo | 7 | T: http/integracao; I: segredo no ambiente, hash não retornado | concluído |
+| 4. Proteção/isolamento | 6 | T: tokens e GET/PUT/DELETE/referências cruzadas | concluído |
+| 5. CRUD categorias/fontes | 8 | T: integração, tipos, posse, duplicidade e vínculos | concluído |
+| 6. CRUD lançamentos | 9 | T: PUT de parcelas ampliado, referências válidas/inválidas e campos preservados | concluído |
+| 7. Filtros/paginação/resumo | 4 | T: integração com páginas 20+1 e resumo dos 21 | concluído |
+| 8. Parcelamento/exclusão | 4 | T: centavos 1–48, UUID, data original, rollback e grupo | concluído |
+| 9. Categoria/comparação | 7 | T: agregação e comparação reais; I: SQL no modelo | concluído |
+| 10. Fontes/destinos | 5 | T: totais e saldo conhecido | concluído |
+| 11. Faturas/limites | 8 | T: funções oficiais e endpoint MySQL | concluído |
+| 12. Organização | 4 | I: CommonJS, Router, models com SQL; nenhuma camada adicional | concluído |
+| 13. HTTP/erros | 4 | T: 200/201/204/400/401/404/409, JSON; I: 500 genérico sem detalhes internos | concluído |
+| 14. SQL/restrições | 4 | I: placeholders e fragmentos fixos; T: oito rejeições UNIQUE/CHECK/FK | concluído |
+| 15. Arquivos/docs/testes | 3 | I: artefatos exigidos; T: instalação, 22 rotas cobertas, blocos PowerShell executados | concluído |
+| 16. Explicação pelos integrantes | 5 | NV: guias não comprovam domínio oral dos alunos | pendente |
+| 17. Execução pelos integrantes | 5 | T: ferramentas e comandos funcionaram; NV: execução dos alunos não presenciada | pendente |
+| 18. Sete tópicos em até 10min | 5 | I: roteiro 9min15; NV: ensaio oral cronometrado não realizado | pendente |
+| Desafio | +10 | T: três indicadores, três meses, regras e aviso; atribuição dos pontos pela professora | concluído |
 
-## Decisões para ambiguidades
+## Decisões e simplificação
 
-- RF7: mês completo compara com o mês calendário anterior (outubro/setembro, como no JSON oficial). Outros intervalos comparam com os dias imediatamente anteriores, de igual duração inclusiva. Anterior zero: variação `null` se atual positivo, zero se ambos zero.
-- RF6: resumo e relatórios usam a data de compra armazenada; todas as parcelas entram nesse período. Só RF9 distribui parcelas pelas faturas. Não deslocar a data SQL.
-- RF9: `meses` é o total de faturas, incluindo a aberta; retornar também meses vazios. Fatura aberta é a que receberia uma compra hoje. Limite utilizado inclui vencimento hoje e todas as parcelas futuras, mesmo fora da janela solicitada; pode ficar disponível negativo, pois o enunciado não exige bloqueio por limite.
-- PUT substitui os campos editáveis do registro. Em parcelas, edita apenas o valor/descrição da parcela; data, categoria, tipo e cartão permanecem os da compra. Não reparcela no PUT. Para corrigir a compra inteira, excluir o grupo e cadastrar novamente.
-- Categoria/fonte com lançamentos: bloquear mudança de tipo (409), preservando a compatibilidade dos registros. Demais campos podem ser atualizados.
-- Parcelamento maior que 1 exige saída em cartão. Recusar divisão que produza parcela de zero centavos. Campos monetários JSON devem ser números com até 2 casas e caber em DECIMAL(12,2).
-- Sem regras adicionais de compatibilidade renda/conta/cartão para lançamentos simples: o texto exige compatibilidade com o tipo da categoria; faturas usam apenas saídas em cartões.
-- Sem alterar o schema mínimo. SQL de criação/carga fica nos scripts exigidos; SQL de acesso da aplicação somente em classes de models.
+- PUT é individual: todos os campos editáveis podem mudar; UUID/numeração permanecem.
+  Não propaga nem reparcela. Mesma data é garantida na criação; edição pode corrigi-la.
+  Tipo deve combinar com categoria; referências precisam pertencer ao dono. RF9 usa
+  somente saídas em cartão, com os campos atuais. Justificativa em REVISAO-FINAL.md.
+- Parcelamento explícito, inclusive 1 vez, exige saída em cartão e gera UUID.
+  Campo omitido significa lançamento simples com grupo nulo. Sem parcela zero.
+- RF7: mês completo compara com mês calendário anterior, conforme outubro/setembro
+  oficial; intervalo parcial compara igual número inclusivo de dias. Variação com
+  anterior zero e atual positivo é null.
+- RF9: janela começa na fatura aberta e mantém vazias. Utilizado inclui vencimento
+  hoje e além da janela. Disponível pode ser negativo; pagamentos não são modelados.
+- Saúde: médias de três meses completos, mês vazio zero; razões sem renda null;
+  projeção mensal usa despesas fora do cartão mais faturas, sem dupla contagem.
+  Fórmulas e limiar didático de 30% estão no README.
+- Removidos consulta redundante e ramo de erro do PUT. Consulta de cartões passou
+  a ser compartilhada por faturas e saúde. Mantidos locks, transações, validações e
+  testes úteis. Nenhum framework, biblioteca, tabela ou camada adicional.
+- SQL da aplicação fica nos models. Schema/seed e scripts de preparação/teste do
+  banco são infraestrutura de demonstração; não são rotas nem acesso da aplicação.
 
-## Checklist final oficial (11.12)
+## Checklist oficial e entrega
 
-- [x] E-mail em maiúsculas e CPF pontuado duplicados: 409 (integração).
-- [x] UNIQUE impede duplicidade sem SELECT prévio (SQL direto).
-- [x] Respostas testadas não expõem senha_hash.
-- [x] Token ausente/expirado/inválido: 401 JSON (HTTP).
-- [x] IDs de outro dono: GET/PUT/DELETE 404 (integração).
-- [x] Saída rejeita categoria de entrada (integração).
-- [x] 100/3 resulta em 33,34 + 33,33 + 33,33 (unitário e MySQL).
-- [x] Compra no fechamento entra no próximo mês (tabela oficial testada).
-- [x] Relatórios retornam números (integração).
-- [x] .env ignorado; .env.example e lockfile versionados.
-- [ ] Outra pessoa reproduziu a instalação somente pelo README (pendente de validação pelo segundo integrante).
+- [x] T: e-mail em maiúsculas e CPF pontuado duplicados recebem 409.
+- [x] T: UNIQUE rejeita duplicidade sem SELECT prévio.
+- [x] T/I: respostas verificadas sem senha_hash; seleção explícita de campos públicos.
+- [x] T: token ausente, inválido ou expirado recebe 401 JSON.
+- [x] T: trocar ID não permite leitura, edição ou exclusão de dados alheios.
+- [x] T: saída não aceita categoria de entrada.
+- [x] T: 100/3 conserva centavos.
+- [x] T: compra no fechamento vai ao mês seguinte.
+- [x] T: relatórios retornam números.
+- [x] I: .env, .local e node_modules ignorados; .env.example e lockfile versionados.
+- [ ] NV: outra pessoa reproduziu a instalação usando apenas README.
+- [ ] NV: nome/RA e contribuição real do outro integrante, com seus próprios commits.
+- [ ] NV: ensaio oral dos dois integrantes, cronometrado.
+- [ ] Pendente: configurar remoto, publicar com autorização e entregar link.
 
-## Auditoria técnica final
-
-| Verificação | Status | Evidência |
-|---|---|---|
-| Somente dependências autorizadas | concluído | npm ls --depth=0: sete pacotes autorizados; audit final zero vulnerabilidades |
-| SQL parametrizado nos models | concluído | Inspeção de todas as consultas e fragmentos fixos |
-| Isolamento e respostas sem hash | concluído | Suíte de integração real e testes HTTP aprovados |
-| Transações e restrições | concluído | Falha por trigger reverteu usuário; novo cadastro posterior funcionou; UNIQUE/CHECK/FK rejeitaram SQL inválido |
-| Schema e seed | concluído | Schema idêntico ao oficial; seed importado em duas bases novas; hash validado por bcrypt.compare |
-| Segredos e binários fora do Git | concluído | .env, .local e node_modules ignorados; conferência de git ls-files |
-| Documentação e comandos | parcial | Guias completos; testes e inicialização reais; ensaio e reprodução pelo segundo integrante pendentes |
-| Commits graduais | concluído | Histórico local separado por configuração, banco, autenticação, cadastros, lançamentos, relatórios, testes e correção de dependência |
-
-## Estado final
-
-RF1–RF9 implementados e validados nos cenários descritos. Dependências instaladas e MySQL 8.4.13 disponível localmente em 127.0.0.1:3307. .env pronto com senhas aleatórias e JWT secreto; nenhum segredo foi versionado. O teste de integração adicionou dois usuários fictícios ao banco de demonstração.
-
-Os commits foram registrados agora por grupos do estado existente, conforme pedido explícito do usuário, com autoria e datas reais. O primeiro commit de checklist permanece preservado. Não houve push.
-
-Permanecem: contribuição real do segundo integrante, seus próprios commits, reprodução da instalação, ensaio e entrega do link. O desafio opcional não foi implementado; não reivindicamos os pontos extras nem garantimos a nota. Evidências detalhadas em [RESULTADOS.md](RESULTADOS.md).
+Não há comprovação manual nova dos alunos. Não se afirma nota 100/100, autoria do
+segundo integrante, publicação ou conclusão da apresentação. Se a composição da equipe
+divergir da dupla citada na entrega, confirmar com a professora: o cabeçalho admite
+até três pessoas, mas política e apresentação mencionam dois. Detalhes das execuções
+reais em [RESULTADOS.md](RESULTADOS.md).

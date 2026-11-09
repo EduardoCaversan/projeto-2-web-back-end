@@ -38,3 +38,12 @@ Transações, `FOR UPDATE`, validações de calendário/centavos, filtro por pro
 helpers usados em vários recursos e testes de falha têm função concreta. Não serão
 removidos. Os algoritmos obrigatórios de parcelas e faturas não apresentaram erro
 reproduzível e serão preservados. Evidências finais: `RESULTADOS.md` e `CONFORMIDADE.md`.
+## Fechamento da revisão
+
+Correções funcionais, preparo da demonstração e desafio foram concluídos com testes
+reais. A suíte final teve 29 testes unitários/transacionais, 6 HTTP, 14 de integração
+e 5 de banco real aprovados, sem ignorados. O guia PowerShell foi executado duas vezes;
+isso não substitui o ensaio oral. A consulta de cartões foi compartilhada entre dois
+relatórios para evitar duplicação. As demais simplificações ficaram limitadas ao PUT.
+Schema, dependências, algoritmos obrigatórios e .env foram preservados. As pendências
+humanas da tabela continuam pendentes e estão discriminadas em CONFORMIDADE.md.
