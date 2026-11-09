@@ -51,7 +51,7 @@ class Lancamento {
     const fonte = await FonteDestino.buscar(dados.fonteDestinoId, usuarioId, conexao, true);
     if (!fonte) return 'fonte';
     if (categoria.tipo !== dados.tipo) return 'tipo';
-    if (dados.parcelas > 1 && (fonte.tipo !== 'cartao_credito' || dados.tipo !== 'saida')) return 'parcelas';
+    if (dados.parcelas !== undefined && (fonte.tipo !== 'cartao_credito' || dados.tipo !== 'saida')) return 'parcelas';
     return null;
   }
 
@@ -61,15 +61,16 @@ class Lancamento {
       await conexao.beginTransaction();
       const falha = await this.referencias(conexao, usuarioId, dados);
       if (falha) { await conexao.rollback(); return { falha }; }
-      const valores = dividirEmParcelas(dados.valor, dados.parcelas);
-      const grupo = dados.parcelas > 1 ? randomUUID() : null;
+      const quantidade = dados.parcelas ?? 1;
+      const valores = dividirEmParcelas(dados.valor, quantidade);
+      const grupo = dados.parcelas !== undefined ? randomUUID() : null;
       const itens = [];
       for (let i = 0; i < valores.length; i++) {
         const [resultado] = await conexao.execute(`INSERT INTO lancamentos
           (usuario_id, tipo, descricao, valor, data, categoria_id, fonte_destino_id, parcela_atual, total_parcelas, grupo_parcelamento)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [usuarioId, dados.tipo, dados.descricao, valores[i], dados.data, dados.categoriaId, dados.fonteDestinoId, i + 1, dados.parcelas, grupo]);
-        itens.push({ id: resultado.insertId, valor: valores[i], data: dados.data, parcela: `${i + 1}/${dados.parcelas}`, grupo_parcelamento: grupo });
+        [usuarioId, dados.tipo, dados.descricao, valores[i], dados.data, dados.categoriaId, dados.fonteDestinoId, i + 1, quantidade, grupo]);
+        itens.push({ id: resultado.insertId, valor: valores[i], data: dados.data, parcela: `${i + 1}/${quantidade}`, grupo_parcelamento: grupo });
       }
       await conexao.commit();
       return { grupo_parcelamento: grupo, itens };
@@ -81,14 +82,10 @@ class Lancamento {
     const conexao = await pool.getConnection();
     try {
       await conexao.beginTransaction();
+      const [linhas] = await conexao.execute('SELECT id FROM lancamentos WHERE id = ? AND usuario_id = ? FOR UPDATE', [id, usuarioId]);
+      if (!linhas.length) { await conexao.rollback(); return { falha: 'registro' }; }
       const falha = await this.referencias(conexao, usuarioId, dados);
       if (falha) { await conexao.rollback(); return { falha }; }
-      const [linhas] = await conexao.execute('SELECT * FROM lancamentos WHERE id = ? AND usuario_id = ? FOR UPDATE', [id, usuarioId]);
-      const atual = linhas[0];
-      if (!atual) { await conexao.rollback(); return { falha: 'registro' }; }
-      if (atual.total_parcelas > 1 && (atual.tipo !== dados.tipo || atual.data !== dados.data || atual.categoria_id !== dados.categoriaId || atual.fonte_destino_id !== dados.fonteDestinoId)) {
-        await conexao.rollback(); return { falha: 'edicaoParcela' };
-      }
       await conexao.execute(`UPDATE lancamentos SET tipo = ?, descricao = ?, valor = ?, data = ?, categoria_id = ?, fonte_destino_id = ?
         WHERE id = ? AND usuario_id = ?`, [dados.tipo, dados.descricao, dados.valor, dados.data, dados.categoriaId, dados.fonteDestinoId, id, usuarioId]);
       await conexao.commit();

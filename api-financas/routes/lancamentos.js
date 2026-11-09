@@ -51,15 +51,14 @@ function validar(req, res, next) {
   if (req.method === 'PUT' && dados.parcelas !== undefined) campos.parcelas = 'PUT edita uma parcela; não envie parcelas.';
   if (Object.keys(campos).length) return res.status(400).json({ erro: 'Dados inválidos.', campos });
   res.locals.dados = { tipo: dados.tipo, descricao: dados.descricao.trim(), valor: dados.valor, data: dados.data,
-    categoriaId: Number(dados.categoriaId), fonteDestinoId: Number(dados.fonteDestinoId), parcelas };
+    categoriaId: Number(dados.categoriaId), fonteDestinoId: Number(dados.fonteDestinoId), parcelas: dados.parcelas };
   next();
 }
 
 function responderFalha(res, falha) {
   if (['categoria', 'fonte', 'registro'].includes(falha)) return res.status(404).json({ erro: 'Lançamento, categoria ou fonte/destino não encontrado.' });
   const campos = falha === 'tipo' ? { categoriaId: 'O tipo da categoria deve ser igual ao lançamento.' }
-    : falha === 'parcelas' ? { parcelas: 'Parcelamento exige saída em cartão de crédito.' }
-      : { parcelas: 'Nesta parcela, altere apenas descrição e valor. Para mudar a compra, exclua o grupo e cadastre novamente.' };
+    : { parcelas: 'Parcelamento exige saída em cartão de crédito.' };
   return res.status(400).json({ erro: 'Dados inválidos.', campos });
 }
 
@@ -70,7 +69,6 @@ router.post('/', validar, async (req, res) => {
 });
 router.put('/:id', validar, async (req, res) => {
   const id = Number(req.params.id);
-  if (!await Lancamento.buscar(id, req.auth.id)) return responderFalha(res, 'registro');
   const resultado = await Lancamento.atualizar(id, req.auth.id, res.locals.dados);
   if (resultado.falha) return responderFalha(res, resultado.falha);
   res.json(await Lancamento.buscar(id, req.auth.id));

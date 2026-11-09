@@ -168,4 +168,55 @@ test('Integração completa — requer API e MySQL; cria dados fictícios', {
     await chamar(`/lancamentos/${idLancamento}`, 204, tokenA, 'DELETE');
     await chamar(`/lancamentos/${idLancamento}`, 404, tokenA);
   });
+  await t.test('PUT de parcela edita todos os campos, preserva grupo e valida referências', async () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const compra = await chamar('/lancamentos', 201, tokenA, 'POST', { ...dados, data: hoje, fonteDestinoId: cartao.id, parcelas: 3 });
+    const [primeira, segunda, terceira] = compra.itens;
+    const original = await chamar(`/lancamentos/${segunda.id}`, 200, tokenA);
+    const outroCartao = await chamar('/fontes-destinos', 201, tokenA, 'POST', {
+      nome: 'Outro cartão', tipo: 'cartao_credito', dia_fechamento: 25, dia_vencimento: 5, limite: 500,
+    });
+    const outraCategoria = categorias.find((c) => c.tipo === 'saida' && c.id !== saida.id);
+    const alterado = { ...dados, descricao: 'Correção individual', valor: 40, data: '2030-12-28',
+      categoriaId: outraCategoria.id, fonteDestinoId: outroCartao.id };
+    const item = await chamar(`/lancamentos/${primeira.id}`, 200, tokenA, 'PUT', {
+      ...alterado, usuario_id: 999, grupo_parcelamento: 'forjado', parcela_atual: 48, total_parcelas: 48,
+    });
+    assert.equal(item.data, alterado.data); assert.equal(item.valor, 40);
+    assert.equal(item.categoria.id, outraCategoria.id); assert.equal(item.fonteDestino.id, outroCartao.id);
+    assert.equal(item.grupo_parcelamento, compra.grupo_parcelamento); assert.equal(item.parcela, '1/3');
+    assert.deepEqual(await chamar(`/lancamentos/${segunda.id}`, 200, tokenA), original);
+    const previsao = await chamar('/relatorios/faturas?meses=12', 200, tokenA);
+    assert.equal(previsao.cartoes.find((c) => c.id === outroCartao.id).limiteUtilizado, 40);
+    assert.equal(previsao.cartoes.find((c) => c.id === cartao.id).limiteUtilizado, 66.66);
+    const rel = await chamar('/relatorios/categorias?inicio=2030-12-01&fim=2030-12-31', 200, tokenA);
+    assert.equal(rel.saidas.categorias.find((c) => c.id === outraCategoria.id).total, 40);
+    const catB = (await chamar('/categorias', 200, tokenB))[0];
+    const fonteB = (await chamar('/fontes-destinos', 200, tokenB))[0];
+    for (const alteracao of [{ categoriaId: catB.id }, { fonteDestinoId: fonteB.id }]) {
+      await chamar(`/lancamentos/${primeira.id}`, 404, tokenA, 'PUT', { ...alterado, ...alteracao });
+    }
+    for (const alteracao of [{ categoriaId: entrada.id }, { valor: 0 }, { data: '2030-02-30' }, { parcelas: 2 }]) {
+      await chamar(`/lancamentos/${primeira.id}`, 400, tokenA, 'PUT', { ...alterado, ...alteracao });
+    }
+    for (const metodo of ['GET', 'PUT', 'DELETE']) await chamar(`/lancamentos/${primeira.id}`, 404, tokenB, metodo, metodo === 'PUT' ? alterado : undefined);
+    assert.deepEqual(await chamar(`/lancamentos/${primeira.id}`, 200, tokenA), item);
+    const entradaCorrigida = await chamar(`/lancamentos/${primeira.id}`, 200, tokenA, 'PUT', {
+      ...alterado, tipo: 'entrada', categoriaId: entrada.id, fonteDestinoId: conta.id,
+    });
+    assert.equal(entradaCorrigida.tipo, 'entrada'); assert.equal(entradaCorrigida.parcela, '1/3');
+    assert.equal((await chamar('/relatorios/faturas', 200, tokenA)).cartoes.find((c) => c.id === outroCartao.id).limiteUtilizado, 0);
+    await chamar(`/lancamentos/${primeira.id}?todasParcelas=true`, 204, tokenA, 'DELETE');
+    for (const id of [segunda.id, terceira.id]) await chamar(`/lancamentos/${id}`, 404, tokenA);
+  });
+  await t.test('Parcelamento explícito em 1 vez tem UUID; simples conserva grupo nulo', async () => {
+    const simples = await chamar('/lancamentos', 201, tokenA, 'POST', dados);
+    assert.equal(simples.grupo_parcelamento, null);
+    const unica = await chamar('/lancamentos', 201, tokenA, 'POST', { ...dados, fonteDestinoId: cartao.id, parcelas: 1 });
+    assert.match(unica.grupo_parcelamento, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    assert.equal(unica.itens.length, 1); assert.equal(unica.itens[0].valor, 100); assert.equal(unica.itens[0].parcela, '1/1');
+    await chamar('/lancamentos', 400, tokenA, 'POST', { ...dados, parcelas: 1 });
+    await chamar('/lancamentos', 400, tokenA, 'POST', { ...dados, tipo: 'entrada', categoriaId: entrada.id, fonteDestinoId: cartao.id, parcelas: 1 });
+    for (const compra of [simples, unica]) await chamar(`/lancamentos/${compra.itens[0].id}?todasParcelas=true`, 204, tokenA, 'DELETE');
+  });
 });
