@@ -35,7 +35,7 @@ api-financas/
 
 ## Instalação no Windows PowerShell
 
-Pré-requisitos: Node.js **22 ou superior**, npm, MySQL Server **8.0.16 ou superior** com InnoDB e `CHECK` efetivo (por exemplo MySQL 8.4), cliente `mysql` no PATH e `curl.exe`. O MySQL Workbench sozinho não substitui o servidor. Instale o servidor a partir do [site oficial MySQL](https://dev.mysql.com/downloads/mysql/) e guarde a senha local de administrador. Não use MariaDB como substituto sem uma nova validação.
+Pré-requisitos: Node.js **22 ou superior**, npm, MySQL Server **8.0.16 ou superior** com InnoDB e `CHECK` efetivo (por exemplo MySQL 8.4) e `curl.exe`. O cliente `mysql.exe` pode ser chamado pelo caminho completo; não precisa estar no PATH. O MySQL Workbench sozinho não substitui o servidor. Instale o servidor pelo [site oficial MySQL](https://dev.mysql.com/downloads/mysql/). Nesta máquina, use o [MySQL portátil já preparado](docs/AMBIENTE-LOCAL.md), na porta 3307; em instalações convencionais, a porta usual é 3306.
 
 Todos os comandos a seguir, exceto `cd`, partem da pasta `api-financas`:
 
@@ -43,7 +43,6 @@ Todos os comandos a seguir, exceto `cd`, partem da pasta `api-financas`:
 cd .\api-financas
 node --version
 npm --version
-mysql --version
 npm install
 ```
 
@@ -51,16 +50,22 @@ Se o PowerShell bloquear `npm.ps1`, use `npm.cmd` nos mesmos comandos. Não é n
 
 ### 1. Criar banco e importar dados
 
-Com o serviço MySQL iniciado e a porta 3306 disponível, use um banco novo de demonstração. O schema cria `api_financas`, suas quatro tabelas e todas as restrições oficiais. Não executa `DROP` e não substitui tabelas existentes. O seed deve ser importado **uma vez**, após o schema, sem usuários existentes; repetir gera duplicidade.
+Com o servidor MySQL iniciado, escolha o caminho do cliente e a porta da sua instalação. O schema cria `api_financas`, suas quatro tabelas e restrições. Não executa `DROP` nem substitui tabelas existentes. Importe o seed **uma vez**, após o schema, sem usuários existentes; repetir gera duplicidade. No ambiente local pronto, pule esta importação: o banco já está carregado.
 
 ```powershell
-mysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/schema.sql"
-mysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/seed.sql"
+$mysql = 'C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe' # ajuste ao local instalado
+$portaMysql = 3306
+# Alternativa portátil nesta máquina:
+# $mysql = (Resolve-Path '.local/mysql-8.4.13-winx64/bin/mysql.exe').Path
+# $portaMysql = 3307
+& $mysql --version
+& $mysql --host=127.0.0.1 --port=$portaMysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/schema.sql"
+& $mysql --host=127.0.0.1 --port=$portaMysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/seed.sql"
 ```
 
 O `-p` solicita a senha no terminal. Não coloque sua senha real no comando ou nos arquivos versionados. `SOURCE` evita o operador `<`, que não funciona como redirecionamento de entrada no Windows PowerShell.
 
-Crie um usuário local para a aplicação, por exemplo no cliente interativo `mysql -u root -p`:
+Crie um usuário local para a aplicação no cliente interativo `& $mysql --host=127.0.0.1 --port=$portaMysql -u root -p`:
 
 ```sql
 CREATE USER 'financas'@'127.0.0.1' IDENTIFIED BY 'SUBSTITUA_POR_SENHA_LOCAL';
@@ -84,7 +89,7 @@ Resultados esperados do seed intacto: **2 usuários, 18 categorias, 6 fontes/des
 ### 2. Configurar ambiente
 
 ```powershell
-Copy-Item .env.example .env
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 notepad .env
 ```
@@ -101,7 +106,7 @@ DB_NAME=api_financas
 JWT_SECRET=sua_chave_aleatoria_gerada
 ```
 
-`.env` e `node_modules/` estão no `.gitignore`. Não compartilhe a chave gerada. O servidor recusa a chave de exemplo. Datas SQL chegam como strings devido a `dateStrings: true`; dias e meses são calculados em UTC para evitar deslocamento de data.
+Use `DB_PORT=3307` no portátil, ou a porta escolhida na instalação. Preserve o `.env` já pronto nesta máquina. `.env`, `.local/` e `node_modules/` estão ignorados. Não compartilhe a chave gerada. O servidor recusa a chave de exemplo. Datas SQL chegam como strings devido a `dateStrings: true`; cálculos usam UTC.
 
 ### 3. Executar
 
@@ -204,10 +209,10 @@ IDs/UUID são ilustrativos e o array foi abreviado: a resposta real contém as t
 - Categoria: `entrada`/`saida`, nome único por usuário e tipo. Fonte/destino: `renda`/`conta`/`cartao_credito`, nome único por usuário. Cartão exige dias inteiros 1–31 e limite positivo. Campos de cartão são gravados como NULL nos outros tipos.
 - Registros com lançamentos não podem ser excluídos nem mudar de tipo (409). Nome e dados do cartão podem ser alterados; mudar fechamento/vencimento recalcula a previsão, pois não há histórico de configuração no schema.
 - Dinheiro é número JSON positivo com até 2 casas, limitado ao DECIMAL(12,2). SQL guarda DECIMAL; cálculos de parcelas e faturas somam centavos inteiros. Valores enviados como strings são rejeitados.
-- Lançamento exige categoria do mesmo tipo e categoria/fonte do mesmo dono. Parcelamento acima de 1 exige saída em cartão, até 48 parcelas, cada uma com ao menos um centavo. Resto inteiro vai para a primeira parcela. O UUID une a compra.
-- **Todas as parcelas guardam a mesma data original da compra.** Listagem e relatórios por período contabilizam as parcelas nessa data; somente faturas deslocam os vencimentos. Não duplicar o deslocamento na data SQL.
+- Lançamento exige categoria do mesmo tipo e categoria/fonte do mesmo dono. Enviar `parcelas` exige saída em cartão, de 1 a 48 vezes, cada parcela com ao menos um centavo. Resto inteiro vai para a primeira. Mesmo `parcelas: 1` gera UUID; omitir o campo cria lançamento simples com grupo nulo.
+- **Na criação, todas as parcelas guardam a mesma data original da compra.** Listagem e relatórios usam a data armazenada; somente faturas deslocam os vencimentos. Não duplicar o deslocamento na data SQL.
 - Listagem usa mês UTC atual quando faltam datas, 20 itens por página, `data DESC, id DESC`. Resumo considera todos os registros dos mesmos filtros, antes do LIMIT. Lista vazia tem `totalPaginas: 0`.
-- PUT recebe todos os campos editáveis. Em parcela de compra múltipla, altera descrição e valor daquela parcela; mantém data, tipo, categoria e cartão. Não aceita `parcelas` no PUT. Excluir/recriar o grupo corrige a compra inteira. Uma edição de valor muda o total atual do grupo, pois não há valor original separado no schema.
+- PUT recebe todos os campos editáveis e altera somente o ID solicitado: descrição, valor, data, tipo, categoria e fonte/destino. Preserva UUID e numeração, sem propagar mudanças às demais parcelas; não aceita `parcelas`. Referências e tipo continuam validados. A parcela corrigida pode ter data/tipo diferentes e passa a ser contabilizada pelos seus campos atuais; só saídas em cartão entram nas faturas. Excluir/recriar o grupo corrige a compra inteira. [Justificativa da interpretação](docs/REVISAO-FINAL.md).
 - RF7 usa SUM/GROUP BY no MySQL. Compara mês completo ao mês anterior, como no exemplo outubro/setembro; outros intervalos usam igual número de dias inclusivos. Inclui categorias que só tiveram movimento anterior. Com anterior zero e atual positivo, variação é `null` (indefinida); percentuais de distribuição são números.
 - RF8 devolve arrays `entradas`, `saidas` e `contas`, com saldo apenas do período. Não há saldo inicial ou conciliação bancária.
 - RF9 considera a fatura aberta que receberia uma compra hoje, mais as seguintes até completar `meses`. Compra **no fechamento** passa ao mês seguinte. A parcela k avança k−1 meses. Vencimento maior que fechamento fica no mesmo mês; caso contrário, mês seguinte. Dias inexistentes viram último dia do mês, conforme a função oficial.
