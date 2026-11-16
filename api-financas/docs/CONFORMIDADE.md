@@ -95,3 +95,28 @@ segundo integrante, publicação ou conclusão da apresentação. Se a composiç
 divergir da dupla citada na entrega, confirmar com a professora: o cabeçalho admite
 até três pessoas, mas política e apresentação mencionam dois. Detalhes das execuções
 reais em [RESULTADOS.md](RESULTADOS.md).
+## Inventário documental e revisão de 15/11/2026
+
+Inspeção inicial: Git limpo em b77fffd, master e identidade preservados. Enunciado
+integral relido (fonte oficial SHA 4ce9499830f2da9ba114722441a96a27dde955d9).
+Não foi encontrado código morto ou abstração que justifique alterar a aplicação.
+Comentários sobre calendário, centavos, isolamento e transações têm finalidade concreta.
+Schema/seed e lógica serão preservados; a intervenção concentra-se nos documentos
+e no auxiliar de comandos de apresentação. Baseline desta rodada: 29 testes
+unitários/simulados e 6 HTTP executados e aprovados, sem ignorados.
+
+| Markdown inventariado | Classificação | Destino planejado e informação preservada |
+|---|---|---|
+| README.md | Obrigatório; instalação e execução | Manter como entrada curta, com configuração e links |
+| testes/requisicoes.md | Obrigatório; referência HTTP | Reformular como Modo B, com as 22 rotas e curl.exe |
+| docs/APRESENTACAO.md | Necessário para apresentação | Modo A com comandos na ordem e sete tópicos |
+| docs/AMBIENTE-LOCAL.md | Necessário para execução local | Manter início/parada do portátil e credenciais administrativas locais |
+| docs/EXPLICACAO-CODIGO.md | Necessário para estudo | Manter fluxo, transações e explicações com código |
+| docs/PERGUNTAS-BANCA.md | Necessário para estudo | Manter perguntas; corrigir semântica de datas após PUT |
+| docs/CONFORMIDADE.md | Evidência de conformidade e testes | Concentrar matriz, execuções e pendências humanas |
+| docs/CHEATSHEET.md | Redundante com roteiro | Integrar comandos e diagnóstico em APRESENTACAO.md |
+| docs/RESULTADOS.md | Evidência útil, arquivo separado redundante | Consolidar resultados e limites de comprovação neste documento |
+| docs/REVISAO-FINAL.md | Histórico intermediário de auditoria | Preservar decisão do PUT e justificativas nesta matriz; histórico no Git |
+
+Os três documentos a consolidar não são arquivos exigidos pela professora. Seus
+links serão atualizados antes da remoção. A evidência de testes não será descartada.

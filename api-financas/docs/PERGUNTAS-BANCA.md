@@ -46,7 +46,7 @@
 
 23. **Como 100 dividido por 3 é armazenado?** 10000 centavos dão base 3333 e resto 1: primeira 33.34 e demais 33.33. A soma é exatamente 100 reais.
 
-24. **As parcelas recebem datas de meses diferentes?** Não. Todas guardam a data original da compra, como exige RF6. RF9 usa parcela_atual para deslocar a fatura.
+24. **As parcelas sempre têm a mesma data?** Na criação, todas recebem a data da compra. Depois, PUT pode corrigir individualmente data, tipo, categoria e fonte/destino, além de descrição e valor. UUID e numeração permanecem; as demais parcelas não mudam. Relatórios e faturas usam os dados atualizados, e somente saídas em cartão entram nas faturas. O grupo não precisa continuar com datas, cartões ou tipos iguais após uma edição.
 
 25. **O que une as parcelas?** Um UUID em grupo_parcelamento, comum às parcelas. Exclusão coletiva também filtra usuario_id.
 
@@ -66,7 +66,7 @@
 
 33. **Por que o resumo é igual em páginas diferentes?** Ele usa todos os registros que atendem aos filtros, antes do LIMIT de 20. A paginação afeta somente itens.
 
-34. **Por que o notebook inteiro aparece em outubro nos relatórios?** Todas as parcelas guardam a data da compra em outubro. É relatório de lançamentos por data de compra, enquanto faturas mostram vencimentos futuros.
+34. **Por que o notebook do seed inteiro aparece em outubro nos relatórios?** No seed intacto, todas as parcelas têm a data da compra em outubro. Relatórios usam a data armazenada; se um PUT corrigir a data de uma parcela, ela passa a contar no período atualizado. Faturas calculam vencimentos usando data, cartão e numeração atuais.
 
 35. **O que impede excluir uma categoria usada?** A FK no banco; o erro vira 409. A aplicação também impede mudar seu tipo enquanto houver lançamentos, preservando compatibilidade.
 
