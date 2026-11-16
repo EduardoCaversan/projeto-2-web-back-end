@@ -1,149 +1,278 @@
-﻿# Apresentação — 9min15, com 45 segundos de margem
+# Apresentação — Modo A (9 minutos + 1 minuto de margem)
 
-**A:** Eduardo Caversan da Silva Rocha — RA 2475391.
-**B:** [preencher nome e RA do segundo integrante].
+## Começar com um comando
 
-Sete tópicos oficiais, incluindo o desafio implementado. A apresenta 4min45 e B
-4min30. Este é um planejamento; **o ensaio oral dos integrantes não foi realizado**.
-A execução técnica de comandos não comprova os critérios 16–18 da apresentação.
-
-## Antes da apresentação
-
-- Ler README e executar os testes. Iniciar MySQL antes do cronômetro: portátil em
-  127.0.0.1:3307, conforme AMBIENTE-LOCAL; outra instalação usa a porta configurada.
-- Deixar `.env` e `.local/admin.json` configurados e fora do projetor. O auxiliar
-  preparar-demo usa esses arquivos sem imprimir segredos. Não apagar o banco atual.
-- Fechar a API anterior (Ctrl+C). Abrir dois terminais na pasta `api-financas`:
-  um para preparar banco/iniciar nodemon, outro para os blocos do CHEATSHEET.
-- Dependências já podem estar instaladas; `npm install` será executado ao vivo.
-  Não contar com download durante a apresentação.
-- Abrir schema.sql, Usuario.js, routes/lancamentos.js, middleware/auth.js,
-  Relatorio.js e utils/faturas.js. Deixar os blocos 2–6 do CHEATSHEET prontos.
-- A demonstração cadastra usuário fictício novo e obtém todos os IDs pela API.
-  Não precisa reservar CPF nem lembrar IDs. Ana/Bruno do seed ficam intactos.
-
-## 1. Código-fonte — 00:00–01:05 — A
-
-**Abrir:** árvore, `database/schema.sql`, `models/Usuario.js`,
-`routes/lancamentos.js` e `middleware/auth.js`.
-
-**Ação:** mostrar quatro tabelas, UNIQUE/CHECK/FK; seguir a rota até a classe e a
-transação. Destacar `require`, `Router` e `req.auth.id`.
-
-**Resultado esperado:** responsabilidades claras e nenhuma senha no código.
-
-**Fala:** “A rota valida HTTP, o modelo executa SQL e utils calculam. O cadastro
-confirma usuário, nove categorias e conta juntos; se falhar, executa rollback.”
-
-**Conceitos:** CommonJS, classe, Router, integridade relacional e transação.
-
-## 2. Linha de comando — 01:05–02:00 — B
-
-**Terminal 1, banco iniciado:**
+Abra PowerShell na pasta **api-financas**, com MySQL ligado e os arquivos locais já
+configurados conforme [AMBIENTE-LOCAL](AMBIENTE-LOCAL.md):
 
 ```powershell
-npm install
-node testes/preparar-demo.js
-$env:DB_NAME = Get-Content .local/demo-banco.txt
-npm run dev
+.\iniciar-apresentacao.ps1
 ```
 
-**Abrir:** `testes/preparar-demo.js`, `database/schema.sql` e `database/seed.sql`.
-**Esperado:** importação dos dois scripts em banco novo, npm sem erro, nodemon ativo.
-O auxiliar apenas adapta o nome do banco e concede privilégios; a API usa a conta
-restrita do `.env`. Não depende do cliente mysql no PATH. A instalação convencional
-com caminho explícito está no README. Não reimportar scripts sobre tabelas existentes.
+O iniciador verifica configuração/porta, instala com `npm ci` somente se necessário,
+importa schema/seed em **banco novo**, seleciona esse banco sem editar `.env`, inicia
+API em **http://127.0.0.1:3000** e confirma login/leitura. Deixe esse terminal aberto;
+**Ctrl+C** encerra apenas a API iniciada por ele. Os bancos ficam preservados.
+O MySQL precisa estar iniciado; o script não instala nem inicia o servidor de banco.
 
-**Fala:** “Importamos o schema e os três meses do seed pelo driver mysql2. A variável
-do terminal seleciona o banco novo sem sobrescrever .env. Nodemon reinicia a API.”
+Em outro PowerShell, na mesma pasta, execute os blocos deste documento na ordem, ou:
 
-**Conceitos:** execução por CLI, scripts SQL, npm, devDependencies e dotenv.
+```powershell
+.\testes\executar-exemplos.ps1
+```
 
-## 3. Cadastro e unicidade — 02:00–03:05 — A
+O segundo comando pausa antes de cada etapa HTTP. Não exige copiar tokens ou IDs.
+Leia a fala e mostre o arquivo indicado antes de avançar com Enter. Não execute os
+blocos manualmente e o auxiliar ao mesmo tempo. `-SemPausas` serve para teste técnico.
+O **Modo B**, com ficha de cada uma das 22 rotas (JSON, curl.exe, resposta, implementação
+ e pergunta), está em [testes/requisicoes.md](../testes/requisicoes.md).
 
-**Executar:** bloco **2. Cadastro e duplicidades** do CHEATSHEET no terminal 2.
-São três POSTs `/auth/cadastro`, com e-mail em maiúsculas e CPF pontuado nas repetições.
-**Abrir:** `routes/auth.js` e as restrições de `usuarios` no schema.
+**Integrante A:** Eduardo Caversan da Silva Rocha — RA 2475391.
+**Integrante B:** [preencher nome e RA].
 
-**Esperado:** 201, 409 com `campos.email`, 409 com `campos.cpf`; nenhuma senha/hash.
+## Tempos e preparação
 
-**Fala:** “Normalizamos antes de gravar. UNIQUE garante a regra mesmo com cadastros
-simultâneos. Bcrypt guarda hash, e o retorno seleciona apenas campos públicos.”
+| Etapa oficial | Tempo | Pessoa |
+|---|---|---|
+| 1. Estrutura, schema, modelo, rota e middleware | 00:00–01:00 | A |
+| 2. Banco, instalação e execução pela linha de comando | 01:00–02:00 | B |
+| 3. Cadastro e duplicidades | 02:00–03:00 | A |
+| 4. Login e isolamento | 03:00–04:00 | B |
+| 5. CRUD, validações e parcelamento | 04:00–06:00 | A (1 min) / B (1 min) |
+| 6. Relatórios e faturas | 06:00–08:00 | A (1 min) / B (1 min) |
+| 7. Saúde financeira e encerramento | 08:00–09:00 | A (30 s) / B (30 s) |
 
-**Conceitos:** validação, normalização, condição de corrida, bcrypt e status HTTP.
+Cada integrante fala 4min30. O minuto restante inclui pequenos atrasos. Abrir os
+arquivos abaixo antes do cronômetro; dependências devem estar no cache. Os tempos
+são **planejados**: execução automática não comprova ensaio oral nem domínio dos alunos.
 
-## 4. Login e proteção — 03:05–04:10 — B
+## 1. Estrutura — 1 minuto
 
-**Executar:** bloco **3. Login e isolamento** do CHEATSHEET: login, me, listagens,
-GET sem token e GET/PUT/DELETE do lançamento do Bruno com token do novo usuário.
+**Abrir:** árvore do projeto, `database/schema.sql`, `models/Usuario.js`,
+`routes/lancamentos.js` e `middleware/auth.js`.
+
+**Mostrar:** quatro tabelas, FK/UNIQUE/CHECK, Router, classe e `req.auth.id`.
+**Falar:** “A rota valida HTTP, o modelo executa SQL parametrizado e utils calculam.
+O cadastro confirma usuário, categorias e conta juntos; qualquer falha faz rollback.”
+**Conceitos:** CommonJS, Express, integridade relacional e transação.
+
+## 2. Banco e inicialização — 1 minuto
+
+**Mostrar:** saída do iniciador, `testes/preparar-demo.js`, schema e seed.
+**Esperado:** banco novo e API confirmada, sem senhas na tela.
+**Falar:** “O auxiliar importa os dois SQL usando mysql2. A variável DB_NAME seleciona
+somente o banco do ensaio; não sobrescrevemos o .env.”
+
+A professora também pede demonstrar **npm install e npm run dev**. Para essa parte
+da avaliação, encerre o iniciador com Ctrl+C e execute no terminal 1:
+
+```powershell
+npm.cmd install --offline --no-audit --no-fund
+$env:DB_NAME = (Get-Content .local/demo-banco.txt -Raw).Trim()
+npm.cmd run dev
+```
+
+Isso reutiliza o banco recém-preparado e mostra nodemon. O cache precisa ter sido
+preparado antes; se usar somente o iniciador, ele roda `node server.js` e **não**
+demonstra nodemon. Após essa alternativa, Ctrl+C e `Remove-Item Env:DB_NAME`.
+**Conceitos:** CLI, npm, devDependencies e dotenv. Não reimporte o seed no mesmo banco.
+
+## 3. Cadastro e duplicidades — 1 minuto
+
+**Operações:** POST /auth/cadastro; [ficha completa](../testes/requisicoes.md#1-cadastrar-usuário).
+**Abrir:** `routes/auth.js`, `Usuario.cadastrar`.
+
+<!-- executar -->
+```powershell
+. .\testes\comandos.ps1
+$cadastro = @{nome='Demo'; email=('demo-'+[guid]::NewGuid().ToString('N')+'@example.com'); cpf=(Novo-Cpf); senha='Teste1234'}
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/cadastro" -H 'Content-Type: application/json' --data-binary (Salvar-Json $cadastro)
+$usuario = Ler-Resposta $status 201
+$usuario | ConvertTo-Json
+$repetido = @{nome='Outro'; email=$cadastro.email.ToUpper(); cpf=(Novo-Cpf); senha='Teste1234'}
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/cadastro" -H 'Content-Type: application/json' --data-binary (Salvar-Json $repetido)
+Ler-Resposta $status 409 | ConvertTo-Json
+$repetido.email = 'outro-' + $cadastro.email
+$repetido.cpf = $cadastro.cpf -replace '(\d{3})(\d{3})(\d{3})(\d{2})', '$1.$2.$3-$4'
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/cadastro" -H 'Content-Type: application/json' --data-binary (Salvar-Json $repetido)
+Ler-Resposta $status 409 | ConvertTo-Json
+```
+
+**Esperado:** 201 `{id,nome,email}`, depois 409 com `campos.email` e `campos.cpf`.
+**Falar:** “Normalizamos e-mail e CPF antes de gravar. UNIQUE garante unicidade;
+bcrypt guarda hash e selecionamos somente campos públicos para a resposta.”
+
+## 4. Login e isolamento — 1 minuto
+
+**Operações:** POST /auth/login, GET /auth/me, GET /categorias e /fontes-destinos;
+GET/PUT/DELETE /lancamentos/:id alheio. Fichas no Modo B.
 **Abrir:** `middleware/auth.js` e `Lancamento.buscar/atualizar/excluir`.
 
-**Esperado:** logins 200; sem token 401; três acessos cruzados 404; dono legítimo 200.
-Não mostrar o token inteiro: os comandos o guardam em variável.
+<!-- executar -->
+```powershell
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/login" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{email=$cadastro.email; senha=$cadastro.senha})
+$login = Ler-Resposta $status 200
+$token = $login.token
+$login.usuario | ConvertTo-Json
+$status = curl.exe @curlArgs "$baseApi/auth/me" -H "Authorization: Bearer $token"
+$me = Ler-Resposta $status 200
+$me | ConvertTo-Json
+$status = curl.exe @curlArgs "$baseApi/categorias" -H "Authorization: Bearer $token"
+$categorias = Ler-Resposta $status 200
+$saida = $categorias | Where-Object tipo -eq 'saida' | Select-Object -First 1
+$entrada = $categorias | Where-Object tipo -eq 'entrada' | Select-Object -First 1
+$categorias | Format-Table id,nome,tipo
+$status = curl.exe @curlArgs "$baseApi/fontes-destinos" -H "Authorization: Bearer $token"
+$fontes = Ler-Resposta $status 200
+$conta = $fontes | Where-Object tipo -eq 'conta' | Select-Object -First 1
+$fontes | Format-Table
+$status = curl.exe @curlArgs "$baseApi/auth/me"
+Ler-Resposta $status 401 | ConvertTo-Json
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/login" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{email='bruno@example.com'; senha='p@5sw0rd'})
+$tokenB = (Ler-Resposta $status 200).token
+$status = curl.exe @curlArgs "$baseApi/lancamentos?inicio=2026-09-01&fim=2026-09-30" -H "Authorization: Bearer $tokenB"
+$alheio = (Ler-Resposta $status 200).itens[0].id
+$status = curl.exe @curlArgs "$baseApi/lancamentos/$alheio" -H "Authorization: Bearer $token"
+Ler-Resposta $status 404 | ConvertTo-Json
+$tentativa = @{tipo='entrada'; descricao='Teste'; valor=1; data='2026-09-05'; categoriaId=$entrada.id; fonteDestinoId=$conta.id}
+$status = curl.exe @curlArgs -X PUT "$baseApi/lancamentos/$alheio" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $tentativa)
+Ler-Resposta $status 404 | ConvertTo-Json
+$status = curl.exe @curlArgs -X DELETE "$baseApi/lancamentos/$alheio" -H "Authorization: Bearer $token"
+Ler-Resposta $status 404 | ConvertTo-Json
+```
 
-**Fala:** “Express-jwt verifica assinatura e expiração de uma hora. O token define
-quem sou; WHERE usuario_id define quais registros posso acessar.”
+**Esperado:** login/me 200; sem JWT 401; três operações cruzadas 404.
+**Falar:** “O JWT dura uma hora. A identidade vem do token e cada consulta filtra o
+proprietário. Não basta conhecer o ID de outro usuário.”
 
-**Conceitos:** autenticação, autorização, JWT e filtros parametrizados.
+## 5. CRUD e parcelamento — 2 minutos
 
-## 5. CRUD e parcelamento — 04:10–06:25 — B
+**Operações:** CRUD de categoria e cartão; criação/leitura/edição de lançamento,
+validação incompatível e exclusão vinculada. Exclusões finais na etapa 6.
+**Abrir:** `routes/lancamentos.js`, `Lancamento.criar/atualizar`, `utils/parcelas.js`.
 
-**Executar:** bloco **4. CRUD e parcelamento** do CHEATSHEET. Cria, consulta e edita
-categoria/cartão; cria compra de 100 em três vezes; consulta/edita a primeira parcela;
-tenta categoria incompatível e exclusão vinculada. As exclusões bem-sucedidas ficam
-no próximo tópico para manter os dados disponíveis nos relatórios.
-**Abrir:** `models/Lancamento.js`, `utils/parcelas.js`.
+<!-- executar -->
+```powershell
+$status = curl.exe @curlArgs -X POST "$baseApi/categorias" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{nome='Categoria demo'; tipo='saida'})
+$cat = Ler-Resposta $status 201
+$idCategoria = $cat.id
+$cat | ConvertTo-Json
+$status = curl.exe @curlArgs "$baseApi/categorias/$idCategoria" -H "Authorization: Bearer $token"
+$catConsultada = Ler-Resposta $status 200
+$catConsultada | ConvertTo-Json
+$status = curl.exe @curlArgs -X PUT "$baseApi/categorias/$idCategoria" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{nome='Categoria atualizada'; tipo='saida'})
+$catAtualizada = Ler-Resposta $status 200
+$catAtualizada | ConvertTo-Json
+$status = curl.exe @curlArgs -X DELETE "$baseApi/categorias/$idCategoria" -H "Authorization: Bearer $token"
+Ler-Resposta $status 204
+$cartaoDados = @{nome='Cartao demo'; tipo='cartao_credito'; dia_fechamento=25; dia_vencimento=5; limite=1000}
+$status = curl.exe @curlArgs -X POST "$baseApi/fontes-destinos" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $cartaoDados)
+$cartao = Ler-Resposta $status 201
+$idCartao = $cartao.id
+$cartao | ConvertTo-Json
+$status = curl.exe @curlArgs "$baseApi/fontes-destinos/$idCartao" -H "Authorization: Bearer $token"
+$cartaoConsultado = Ler-Resposta $status 200
+$cartaoConsultado | ConvertTo-Json
+$cartaoDados.nome = 'Visa demo'
+$cartaoDados.limite = 1200
+$status = curl.exe @curlArgs -X PUT "$baseApi/fontes-destinos/$idCartao" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $cartaoDados)
+$cartaoAtualizado = Ler-Resposta $status 200
+$cartaoAtualizado | ConvertTo-Json
+$hoje = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd')
+$compraDados = @{tipo='saida'; descricao='Curso'; valor=100; data=$hoje; categoriaId=$saida.id; fonteDestinoId=$idCartao; parcelas=3}
+$status = curl.exe @curlArgs -X POST "$baseApi/lancamentos" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $compraDados)
+$compra = Ler-Resposta $status 201
+$idLancamento = $compra.itens[0].id
+$compra.itens | Format-Table id,valor,data,parcela
+$status = curl.exe @curlArgs "$baseApi/lancamentos/$idLancamento" -H "Authorization: Bearer $token"
+$item = Ler-Resposta $status 200
+$item | ConvertTo-Json -Depth 4
+$edicao = @{tipo='saida'; descricao='Curso corrigido'; valor=33.34; data=$hoje; categoriaId=$saida.id; fonteDestinoId=$idCartao}
+$status = curl.exe @curlArgs -X PUT "$baseApi/lancamentos/$idLancamento" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $edicao)
+$itemAtualizado = Ler-Resposta $status 200
+$itemAtualizado | ConvertTo-Json -Depth 4
+$invalido = @{tipo='saida'; descricao='Erro'; valor=10; data=$hoje; categoriaId=$entrada.id; fonteDestinoId=$conta.id}
+$status = curl.exe @curlArgs -X POST "$baseApi/lancamentos" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary (Salvar-Json $invalido)
+Ler-Resposta $status 400 | ConvertTo-Json
+$status = curl.exe @curlArgs -X DELETE "$baseApi/categorias/$($saida.id)" -H "Authorization: Bearer $token"
+Ler-Resposta $status 409 | ConvertTo-Json
+```
 
-**Esperado:** criações 201, leituras/edições 200, validação 400, vínculo 409.
-Parcelas 33,34 + 33,33 + 33,33, mesma data e UUID.
+**Esperado:** CRUD 201/200/204; 100 em 3 = **33,34 + 33,33 + 33,33**;
+incompatibilidade 400, categoria vinculada 409.
+**Falar:** “Dividimos em centavos e colocamos o resto na primeira parcela. Na criação,
+a data é a mesma. PUT edita só um registro e preserva UUID/numeração; não reparcela.”
 
-**Fala:** “Dividimos 10 mil centavos; o resto fica na primeira. As datas SQL continuam
-iguais na criação. PUT corrige somente uma parcela, preservando grupo e numeração.
-A exclusão coletiva usa UUID e dono. Não há reprocessamento automático da compra.”
+## 6. Relatórios e faturas — 2 minutos
 
-**Conceitos:** verbos REST, centavos inteiros, transação, FK e identidade do recurso.
+**Operações:** GET /relatorios/categorias, /fontes-destinos, /faturas; DELETE de grupo e cartão.
+**Abrir:** `Relatorio.categorias/fontesDestinos/faturas` e `utils/faturas.js`.
 
-## 6. Relatórios e término do CRUD — 06:25–08:30 — A
+<!-- executar -->
+```powershell
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/login" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{email='ana@example.com'; senha='p@5sw0rd'})
+$tokenAna = (Ler-Resposta $status 200).token
+$status = curl.exe @curlArgs "$baseApi/relatorios/categorias?inicio=2026-10-01&fim=2026-10-31" -H "Authorization: Bearer $tokenAna"
+$categoriasOutubro = Ler-Resposta $status 200
+$categoriasOutubro.saidas.categorias | Format-Table nome,total,percentual,anterior,variacao
+$categoriasOutubro | Select-Object @{n='Entradas';e={$_.entradas.total}},@{n='Saidas';e={$_.saidas.total}}
+$status = curl.exe @curlArgs "$baseApi/relatorios/fontes-destinos?inicio=2026-10-01&fim=2026-10-31" -H "Authorization: Bearer $tokenAna"
+$fontesOutubro = Ler-Resposta $status 200
+$fontesOutubro.contas | Format-Table
+$status = curl.exe @curlArgs "$baseApi/relatorios/faturas?meses=3" -H "Authorization: Bearer $token"
+$previsao = Ler-Resposta $status 200
+$faturas = $previsao.cartoes | Where-Object id -eq $idCartao
+$faturas | Select-Object limiteTotal,limiteUtilizado,limiteDisponivel
+$faturas.faturas | Select-Object referencia,fechamento,vencimento,total,@{n='Parcelas';e={$_.lancamentos.parcela -join ', '}} | Format-Table
+$status = curl.exe @curlArgs -X DELETE "$baseApi/lancamentos/${idLancamento}?todasParcelas=true" -H "Authorization: Bearer $token"
+Ler-Resposta $status 204
+$status = curl.exe @curlArgs -X DELETE "$baseApi/fontes-destinos/$idCartao" -H "Authorization: Bearer $token"
+Ler-Resposta $status 204
+```
 
-**Executar:** bloco **5. Relatórios e exclusões** do CHEATSHEET.
-**Endpoints:** `/relatorios/categorias`, `/relatorios/fontes-destinos` (outubro/2026)
-e `/relatorios/faturas?meses=3`; DELETE do grupo, categoria e cartão.
-**Abrir:** SUM/GROUP BY em `models/Relatorio.js` e `<` em `utils/faturas.js`.
+**Esperado:** Ana/outubro: entradas **5200**, saídas **5500**, Alimentação **1000/800**
+(**25%**), conta corrente **2700**. Demo: três faturas **33,34/33,33/33,33**,
+limite utilizado **100**, disponível **1100**; exclusões 204 sem corpo.
+**Falar:** “SUM e GROUP BY agregam no MySQL. Uma compra no fechamento passa ao ciclo
+seguinte; a parcela k avança k−1 meses. A previsão mostra a referência de cada parcela.”
+As referências dependem do dia do ensaio. O seed permanece intacto.
 
-**Esperado:** Ana: entradas 5200, saídas 5500, Alimentação 1000 vs 800 (25%), conta
-corrente 2700. No cartão novo: cada parcela em uma referência consecutiva, usado
-100, disponível 1100. Três exclusões finais 204. Os usuários separados evitam
-que a compra ao vivo modifique os totais conhecidos do seed.
+## 7. Saúde financeira — 1 minuto
 
-**Fala:** “MySQL agrega os dados; convertemos DECIMAL para número JSON. Relatórios
-usam data da compra; faturas calculam vencimento pela parcela. Compra no fechamento
-entra no próximo ciclo. Limite inclui todas as parcelas ainda não vencidas.”
+**Operação:** GET /saude-financeira. **Abrir:** `routes/saudeFinanceira.js` e
+`utils/saudeFinanceira.js`.
 
-**Conceitos:** SUM/GROUP BY, percentuais, calendário UTC e integridade referencial.
+<!-- executar -->
+```powershell
+$status = curl.exe @curlArgs "$baseApi/saude-financeira" -H "Authorization: Bearer $tokenAna"
+$saude = Ler-Resposta $status 200
+$saude.aviso
+$saude.indicadores
+$saude.projecao | Format-Table
+$saude.dicas
+```
 
-## 7. Desafio — 08:30–09:15 — A (30s), B (15s)
+**Esperado:** 200, três indicadores, projeção de três meses, dicas e aviso educativo.
+**Falar:** “Usamos três meses completos como histórico. Sem renda, a taxa fica nula.
+A projeção soma despesas fora do cartão e faturas conhecidas, sem contar o cartão duas
+vezes. São informações educativas, não recomendação profissional.”
 
-**Executar:** bloco **6. Saúde financeira** do CHEATSHEET: GET `/saude-financeira`.
-**Abrir:** `utils/saudeFinanceira.js`, se necessário.
+## Problemas frequentes
 
-**Esperado:** aviso educativo, três indicadores, três linhas de projeção e dicas.
-Valores dependem da data; não prometer números fixos para o seed antigo.
+| Sintoma | Resolver |
+|---|---|
+| Porta 3000 ocupada | Ctrl+C no terminal da API anterior; o iniciador não mata processos alheios |
+| MySQL indisponível / ECONNREFUSED | Iniciar servidor e conferir DB_HOST/DB_PORT; portátil local usa 3307 |
+| Credenciais inválidas | Conferir .env e .local/admin.json fora do projetor |
+| Banco incorreto | Encerrar API, retirar DB_NAME antigo da sessão e repetir o iniciador |
+| 401 / token expirado | Repetir o roteiro desde o cadastro/login; não copiar tokens |
+| 404 / ID inexistente | Executar os blocos em ordem no mesmo terminal |
+| 409 duplicidade | Recomeçar pelo cadastro novo; os dois 409 da etapa 3 são esperados |
+| Script bloqueado | Abrir `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-apresentacao.ps1`; vale apenas nesse processo |
+| npm.ps1 bloqueado | Usar npm.cmd |
+| Sem cache para instalação offline | Preparar dependências com npm ci antes do ensaio |
 
-**Fala de A:** “Usamos os três meses completos anteriores. Sem renda, a razão é
-null. A projeção soma média das despesas fora do cartão e faturas conhecidas;
-assim não conta a compra duas vezes. Saldo previsto é mensal, não saldo bancário.”
-**Fala de B:** “Dicas vêm de regras documentadas, como saldo negativo e comprometimento
-acima de 30%. São informações educativas, não recomendação profissional.”
-
-**Conceitos:** agregação, funções puras, condicionais, limites de uma projeção.
-
-## Ensaio dos integrantes — pendente
-
-- [ ] Ambos reproduziram o README e explicaram todos os trechos.
-- [ ] Executaram os sete tópicos, incluindo instalação, transições e importação.
-- [ ] Tempo oral medido: ___min ___s, data: ___, participantes: ___.
-- [ ] Duração abaixo de 10 minutos; 09:15–10:00 fica para pequenos atrasos.
-- [ ] Identificação, contribuições reais e commits do outro integrante preenchidos.
-- [ ] Repositório remoto/link de entrega providenciados pelo responsável.
-
-Não marcar ensaio ou domínio como verificado por causa de testes automatizados.
+Não projetar .env, admin.json nem arquivos de resposta em testes/.temporarios (podem
+conter token). Os comandos exibem apenas dados fictícios, status e resultados.
+Perguntas e estudo: [PERGUNTAS-BANCA](PERGUNTAS-BANCA.md),
+[EXPLICACAO-CODIGO](EXPLICACAO-CODIGO.md). Evidências: [CONFORMIDADE](CONFORMIDADE.md).
