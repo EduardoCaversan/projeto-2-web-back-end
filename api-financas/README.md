@@ -9,6 +9,35 @@ A API cadastra usuários, autentica com JWT, mantém categorias, fontes/destinos
 
 **Estado técnico:** RF1–RF9 e desafio implementados. Validação em 09/11/2026: 29 testes unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real aprovados, sem ignorados. Os dois últimos totais incluem seus testes principais. Apresentação, contribuição do segundo integrante e envio do link continuam pendentes. Veja [resultados](docs/RESULTADOS.md), [conformidade](docs/CONFORMIDADE.md) e [ambiente local pronto](docs/AMBIENTE-LOCAL.md).
 
+## Apresentação com um comando
+
+Com MySQL iniciado e `.env` / `.local/admin.json` configurados conforme
+[AMBIENTE-LOCAL](docs/AMBIENTE-LOCAL.md), abra PowerShell na pasta `api-financas`:
+
+```powershell
+.\iniciar-apresentacao.ps1
+```
+
+O script verifica Node.js/npm, configuração, MySQL e porta 3000; instala com
+`npm ci` apenas se as dependências estiverem ausentes/incompatíveis; reutiliza
+`testes/preparar-demo.js` para importar schema/seed em banco novo; inicia a API e
+confirma login e leitura. Preserva `.env`, banco original e versões do lockfile.
+Deixe o terminal aberto; **Ctrl+C** encerra somente a API criada pelo script.
+Não encerra processos que já ocupem a porta. Bancos de ensaio ficam disponíveis
+para inspeção, sem remoção automática. O MySQL precisa estar ligado previamente.
+
+Abra [docs/APRESENTACAO.md](docs/APRESENTACAO.md). Em outro terminal na mesma pasta:
+
+```powershell
+.\testes\executar-exemplos.ps1
+```
+
+O roteiro pausa entre etapas, obtém tokens/IDs automaticamente e confere os status.
+O iniciador usa `node server.js`; a demonstração de `npm run dev` exigida na
+avaliação está indicada no roteiro. Se a política local bloquear o script, use
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-apresentacao.ps1`,
+sem alterar a política global.
+
 ## Tecnologias e organização
 
 Node.js 22+, JavaScript CommonJS, Express 5, mysql2/promise, jsonwebtoken, express-jwt, bcrypt, dotenv. Nodemon somente no desenvolvimento. Testes usam `node:test`, `node:assert` e `fetch` nativos. Nenhum ORM, framework adicional ou dependência de testes.
