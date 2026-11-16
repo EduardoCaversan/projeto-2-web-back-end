@@ -7,7 +7,8 @@ Projeto acadêmico de **Programação Web Back-end**, implementado conforme [o e
 
 A API cadastra usuários, autentica com JWT, mantém categorias, fontes/destinos e lançamentos privados, divide compras em parcelas e retorna relatórios e faturas em JSON. O objetivo é aplicar Express, classes de modelo, MySQL, transações e autenticação estudados na disciplina. Não há interface gráfica.
 
-**Estado técnico:** RF1–RF9 e desafio implementados. Validação em 09/11/2026: 29 testes unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real aprovados, sem ignorados. Os dois últimos totais incluem seus testes principais. Apresentação, contribuição do segundo integrante e envio do link continuam pendentes. Veja [resultados](docs/RESULTADOS.md), [conformidade](docs/CONFORMIDADE.md) e [ambiente local pronto](docs/AMBIENTE-LOCAL.md).
+**Estado técnico:** RF1–RF9 e desafio implementados e preservados. Evidências, testes
+executados e pendências humanas em [CONFORMIDADE](docs/CONFORMIDADE.md).
 
 ## Apresentação com um comando
 
@@ -49,10 +50,11 @@ api-financas/
 ├── models/     Usuario.js, Categoria.js, FonteDestino.js, Lancamento.js, Relatorio.js
 ├── routes/     auth.js, categorias.js, fontesDestinos.js, lancamentos.js, relatorios.js, saudeFinanceira.js
 ├── utils/      cpf.js, validacao.js, datas.js, parcelas.js, faturas.js, saudeFinanceira.js
-├── testes/     requisicoes.md, comandos.ps1, unidades.test.js,
+├── testes/     requisicoes.md, comandos.ps1, executar-exemplos.ps1, unidades.test.js,
 │               transacoes.test.js, http.test.js, integracao.test.js, banco.test.js, preparar-demo.js
-├── docs/       CONFORMIDADE.md, RESULTADOS.md, CHEATSHEET.md,
-│               APRESENTACAO.md, EXPLICACAO-CODIGO.md, PERGUNTAS-BANCA.md
+├── docs/       APRESENTACAO.md, AMBIENTE-LOCAL.md, CONFORMIDADE.md,
+│               EXPLICACAO-CODIGO.md, PERGUNTAS-BANCA.md
+├── iniciar-apresentacao.ps1
 ├── .env.example
 ├── .gitignore
 ├── package.json
@@ -60,7 +62,7 @@ api-financas/
 └── server.js
 ```
 
-`package-lock.json` foi gerado pelo npm e versionado. As dependências diretas estão fixadas; mysql2 foi atualizado para 3.24.6 após auditoria. O npm informou zero vulnerabilidades na instalação final.
+O lockfile e as versões diretas estão fixados. Não há dependências adicionais de testes.
 
 ## Instalação no Windows PowerShell
 
@@ -159,13 +161,14 @@ Em outro terminal, na mesma pasta:
 
 ```powershell
 . .\testes\comandos.ps1
-$login = Api POST '/auth/login' @{email='ana@example.com'; senha='p@5sw0rd'}
-$token = $login.token
-Api GET '/auth/me' $null $token
-curl.exe -i http://127.0.0.1:3000/categorias -H "Authorization: Bearer $token"
+$status = curl.exe @curlArgs -X POST "$baseApi/auth/login" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{email='ana@example.com'; senha='p@5sw0rd'})
+$token = (Ler-Resposta $status 200).token
+$status = curl.exe @curlArgs "$baseApi/auth/me" -H "Authorization: Bearer $token"
+Ler-Resposta $status 200 | ConvertTo-Json
 ```
 
-`Api` é apenas um auxiliar de testes PowerShell: chama `curl.exe`, mostra o status e converte o JSON. Não faz parte da aplicação. O JWT HS256 dura **1 hora**, contém `id`, `nome` e `email`, e deve ser enviado em `Authorization: Bearer TOKEN`. O conteúdo do JWT é legível; assinatura não é criptografia. A senha não vai no token nem nas respostas. Após expirar, faça login novamente.
+Os auxiliares apenas gravam/leem JSON para evitar problemas de aspas no PowerShell;
+não pertencem à aplicação. O JWT HS256 dura **1 hora**, contém `id`, `nome` e `email`, e deve ser enviado em `Authorization: Bearer TOKEN`. O conteúdo do JWT é legível; assinatura não é criptografia. A senha não vai no token nem nas respostas. Após expirar, faça login novamente.
 
 ## Rotas
 
@@ -198,39 +201,11 @@ Todas exigem JWT, exceto os dois POSTs de autenticação. GETs de detalhe de cat
 
 Erro tem sempre `{ "erro": "..." }`, com `campos` quando aplicável. Status: **400** dados inválidos; **401** token/credenciais inválidos; **404** ausente ou pertencente a outro usuário; **409** duplicidade ou vínculo; **500** falha inesperada, sem SQL ou stack na resposta. Exclusão **204** não tem corpo. Não retornar HTML faz parte dos testes.
 
-## Exemplos de lançamentos e respostas
+## Exemplos completos
 
-Com seed intacto, Ana tem Educação ID 8 e Nubank ID 3:
-
-```powershell
-$compra = Api POST '/lancamentos' @{tipo='saida'; descricao='Curso'; valor=100; data='2026-11-03'; categoriaId=8; fonteDestinoId=3; parcelas=3} $token
-$compra | ConvertTo-Json -Depth 6
-Api GET '/lancamentos?inicio=2026-11-01&fim=2026-11-30&pagina=1' $null $token | ConvertTo-Json -Depth 6
-```
-
-POST retorna `grupo_parcelamento` (UUID) e `itens` contendo `id`, `valor`, `data`, `parcela` e `grupo_parcelamento`. Os valores desta compra serão **33.34, 33.33, 33.33**, todos com `data: "2026-11-03"`. Faturas: dezembro/2026, janeiro/2027 e fevereiro/2027. Para ver faturas abertas em outra data, faça uma compra com a data atual, conforme o guia rápido.
-
-Exemplo de estrutura da listagem, em um usuário com apenas essa compra no período:
-
-```json
-{
-  "periodo": { "inicio": "2026-11-01", "fim": "2026-11-30" },
-  "resumo": { "entradas": 0, "saidas": 100, "saldo": -100 },
-  "pagina": 1,
-  "totalPaginas": 1,
-  "itens": [
-    {
-      "id": 33, "tipo": "saida", "descricao": "Curso", "valor": 33.33,
-      "data": "2026-11-03", "categoria": { "id": 8, "nome": "Educação" },
-      "fonteDestino": { "id": 3, "nome": "Cartão Nubank" }, "parcela": "3/3",
-      "parcela_atual": 3, "total_parcelas": 3,
-      "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
-    }
-  ]
-}
-```
-
-IDs/UUID são ilustrativos e o array foi abreviado: a resposta real contém as três parcelas. No seed existem outros lançamentos, portanto o resumo real também os inclui.
+O [Modo B](testes/requisicoes.md) contém corpos JSON, curl.exe, respostas e erros das
+22 rotas. Os exemplos obtêm IDs reais e criam usuário novo. Para compra de R$ 100
+em três parcelas, espere 33,34 / 33,33 / 33,33. Não é necessário copiar tokens nem IDs.
 
 ## Regras de negócio e decisões documentadas
 
@@ -242,7 +217,7 @@ IDs/UUID são ilustrativos e o array foi abreviado: a resposta real contém as t
 - Lançamento exige categoria do mesmo tipo e categoria/fonte do mesmo dono. Enviar `parcelas` exige saída em cartão, de 1 a 48 vezes, cada parcela com ao menos um centavo. Resto inteiro vai para a primeira. Mesmo `parcelas: 1` gera UUID; omitir o campo cria lançamento simples com grupo nulo.
 - **Na criação, todas as parcelas guardam a mesma data original da compra.** Listagem e relatórios usam a data armazenada; somente faturas deslocam os vencimentos. Não duplicar o deslocamento na data SQL.
 - Listagem usa mês UTC atual quando faltam datas, 20 itens por página, `data DESC, id DESC`. Resumo considera todos os registros dos mesmos filtros, antes do LIMIT. Lista vazia tem `totalPaginas: 0`.
-- PUT recebe todos os campos editáveis e altera somente o ID solicitado: descrição, valor, data, tipo, categoria e fonte/destino. Preserva UUID e numeração, sem propagar mudanças às demais parcelas; não aceita `parcelas`. Referências e tipo continuam validados. A parcela corrigida pode ter data/tipo diferentes e passa a ser contabilizada pelos seus campos atuais; só saídas em cartão entram nas faturas. Excluir/recriar o grupo corrige a compra inteira. [Justificativa da interpretação](docs/REVISAO-FINAL.md).
+- PUT recebe todos os campos editáveis e altera somente o ID solicitado: descrição, valor, data, tipo, categoria e fonte/destino. Preserva UUID e numeração, sem propagar mudanças às demais parcelas; não aceita `parcelas`. Referências e tipo continuam validados. A parcela corrigida pode ter data/tipo diferentes e passa a ser contabilizada pelos seus campos atuais; só saídas em cartão entram nas faturas. Excluir/recriar o grupo corrige a compra inteira. [Justificativa da interpretação](docs/CONFORMIDADE.md).
 - RF7 usa SUM/GROUP BY no MySQL. Compara mês completo ao mês anterior, como no exemplo outubro/setembro; outros intervalos usam igual número de dias inclusivos. Inclui categorias que só tiveram movimento anterior. Com anterior zero e atual positivo, variação é `null` (indefinida); percentuais de distribuição são números.
 - RF8 devolve arrays `entradas`, `saidas` e `contas`, com saldo apenas do período. Não há saldo inicial ou conciliação bancária.
 - RF9 considera a fatura aberta que receberia uma compra hoje, mais as seguintes até completar `meses`. Compra **no fechamento** passa ao mês seguinte. A parcela k avança k−1 meses. Vencimento maior que fechamento fica no mesmo mês; caso contrário, mês seguinte. Dias inexistentes viram último dia do mês, conforme a função oficial.
@@ -274,7 +249,8 @@ foi acionada. Não atribui uma nota à pessoa. Toda resposta contém o aviso obr
 “Informações educativas; não constituem recomendação financeira profissional.”
 
 ```powershell
-Api GET '/saude-financeira' $null $token | ConvertTo-Json -Depth 6
+$status = curl.exe @curlArgs "$baseApi/saude-financeira" -H "Authorization: Bearer $token"
+Ler-Resposta $status 200 | ConvertTo-Json -Depth 6
 ```
 
 ## Testes, apresentação e participação dos integrantes
@@ -302,7 +278,11 @@ do arquivo privado em [AMBIENTE-LOCAL](docs/AMBIENTE-LOCAL.md). Sem habilitaçã
 
 Em ambiente com restrição de subprocessos, substitua o executor por `node testes/unidades.test.js` e `node testes/transacoes.test.js`. O mesmo vale para os outros dois arquivos, respeitando seus pré-requisitos.
 
-Para demonstrar: configure banco e API; siga [CHEATSHEET](docs/CHEATSHEET.md) e ensaie [APRESENTACAO](docs/APRESENTACAO.md). O roteiro tem 9min15 (A: 4min45, B: 4min30), com 45 segundos de margem. São **22 rotas**, cobertas em [requisicoes.md](testes/requisicoes.md). O preparo reproduzível importa schema/seed em banco novo: `node testes/preparar-demo.js`, seguido de `$env:DB_NAME = Get-Content .local/demo-banco.txt` e `npm run dev`. Configure antes o arquivo administrativo privado conforme AMBIENTE-LOCAL.
+Para demonstrar, execute `.\iniciar-apresentacao.ps1` e abra
+[APRESENTACAO](docs/APRESENTACAO.md). Em outro terminal,
+`.\testes\executar-exemplos.ps1` conduz o Modo A; `-Modo B` percorre todas as rotas.
+O planejamento é de nove minutos, com um minuto de margem; precisa de ensaio oral.
+O roteiro distingue início automático de demonstração explícita de npm/nodemon.
 
 Ambos precisam explicar qualquer trecho conforme a política acadêmica. Leia [EXPLICACAO-CODIGO](docs/EXPLICACAO-CODIGO.md) e [PERGUNTAS-BANCA](docs/PERGUNTAS-BANCA.md). O segundo integrante deve realizar trabalho real: instalar/validar MySQL, executar integração, corrigir resultados, revisar documentação e fazer seus próprios commits. Não foram criados commits em seu nome. A publicação no Git remoto e o envio do link da entrega não foram executados.
 

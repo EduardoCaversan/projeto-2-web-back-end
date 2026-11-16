@@ -74,7 +74,7 @@
 
 37. **Como erros async chegam ao middleware?** Express 5 encaminha Promises rejeitadas. O middleware final tem quatro parâmetros e responde JSON genérico para falhas inesperadas.
 
-38. **Quais testes foram realmente executados?** Em 09/11/2026 passaram 29 unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real. Os últimos totais incluem seus testes principais. UNIQUE, CHECK, FK e rollback no cadastro e na segunda parcela foram exercitados com MySQL 8.4.13. Detalhes em RESULTADOS.md.
+38. **Quais testes foram realmente executados?** Em 16/11/2026 passaram 29 unitários/transacionais, 6 HTTP, 14 de integração e 5 de banco real. Os últimos totais incluem seus testes principais. UNIQUE, CHECK, FK e rollback no cadastro e na segunda parcela foram exercitados com MySQL 8.4.13. Detalhes em CONFORMIDADE.md.
 
 39. **O desafio de saúde financeira foi feito?** Sim. Calcula taxa de poupança, comprometimento com cartões e parcelas a vencer; projeta três meses e gera dicas por regras. Usa os próprios dados e sempre retorna aviso educativo.
 

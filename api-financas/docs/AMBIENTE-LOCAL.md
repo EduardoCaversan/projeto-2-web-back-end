@@ -15,16 +15,20 @@ $dadosMysql = (Resolve-Path '.local/dados').Path
 Deixe esse terminal aberto. Em outro terminal na mesma pasta:
 
 ```powershell
-npm start
+.\iniciar-apresentacao.ps1
 ```
 
-Se já estiverem rodando nesta sessão, use diretamente http://127.0.0.1:3000. Não inicie outra instância na mesma porta. Para encerrar o banco de forma controlada, em api-financas:
+Se já estiverem rodando, use o terminal da API atual ou encerre-a com Ctrl+C antes
+de iniciar a demonstração. O iniciador não encerra processos alheios e exige porta 3000 livre.
+Para encerrar o banco de forma controlada, em api-financas:
 
 ```powershell
 node -e "const fs=require('node:fs'); const mysql=require('mysql2/promise'); (async()=>{const c=await mysql.createConnection(JSON.parse(fs.readFileSync('.local/admin.json','utf8'))); await c.query('SHUTDOWN'); await c.end();})().catch(e=>{console.error(e.code);process.exitCode=1;});"
 ```
 
-Encerre a API com Ctrl+C no terminal em que a iniciou. Os dados são preservados. O seed já foi importado; não repetir a carga. A suíte de integração adicionou dois usuários fictícios; Ana/Bruno e seus dados continuam disponíveis para demonstração. Um banco separado, api_financas_verificacao, foi usado para conferir restrições e rollback; a trigger temporária foi removida após o teste.
+Encerre a API com Ctrl+C no terminal em que a iniciou. Dados e bancos de demonstração
+são preservados. Não reimporte o seed em tabelas existentes. Para usar o banco original,
+execute `npm start` com DB_NAME da sessão removido e a porta 3000 disponível.
 
 Testes reproduzíveis:
 
@@ -43,10 +47,7 @@ Instalação em outra máquina continua descrita no README. A pasta .local e o .
 Com o MySQL iniciado, execute em `api-financas`:
 
 ```powershell
-npm install
-node testes/preparar-demo.js
-$env:DB_NAME = Get-Content .local/demo-banco.txt
-npm run dev
+.\iniciar-apresentacao.ps1
 ```
 
 Encerre antes a API que usa a mesma porta, com Ctrl+C no terminal dela. O auxiliar
@@ -54,8 +55,10 @@ usa `mysql2` já permitido e as credenciais administrativas locais; não exige c
 MySQL no PATH. Lê `schema.sql` e `seed.sql`, troca apenas o nome do banco por um nome
 novo, importa os dois scripts e concede ao usuário da API os quatro privilégios.
 Não altera o schema versionado nem o `.env`, não apaga bancos e não imprime senhas.
-`DB_NAME` do terminal prevalece sobre o `.env`. Ao terminar, Ctrl+C e
-`Remove-Item Env:DB_NAME` restauram a seleção padrão para a próxima inicialização.
+O iniciador configura DB_NAME somente na sessão da API e restaura a variável ao sair.
+Em outro terminal: `.\testes\executar-exemplos.ps1`. Roteiro em [APRESENTACAO](APRESENTACAO.md).
+O auxiliar isolado continua disponível: `node testes/preparar-demo.js`.
+Ele prepara o banco; o iniciador acrescenta verificações, dependências e início/encerramento da API.
 
 O arquivo `.local/admin.json` já existe nesta máquina. Em outra instalação, crie-o
 **localmente**, com credenciais administrativas do seu MySQL, antes de usar o auxiliar:

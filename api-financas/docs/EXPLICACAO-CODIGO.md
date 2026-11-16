@@ -112,7 +112,7 @@ PUT pode corrigir descrição, valor, data, tipo, categoria e fonte daquele ID, 
 grupo/numeração e as demais parcelas. Verifica primeiro o dono, depois as referências
 e a compatibilidade de tipo, na mesma transação. Relatórios usam os campos corrigidos;
 se deixar de ser saída em cartão, o registro deixa de entrar nas faturas. É a semântica
-individual do recurso, documentada em REVISAO-FINAL.md, sem atualização implícita do grupo.
+individual do recurso, documentada em CONFORMIDADE.md, sem atualização implícita do grupo.
 
 ## 9. Datas e faturas
 
@@ -144,7 +144,7 @@ Express 5 encaminha rejeições async automaticamente, mas transações ainda pr
 
 ## 12. O que estudar e validar de verdade
 
-Ambos os integrantes devem executar cada rota, explicar os arrays de parâmetros SQL, seguir uma transação até o rollback e calcular uma fatura manualmente. O enunciado permite apoio de IA, mas exige compreensão e autoria efetiva. A validação MySQL foi realizada e registrada em RESULTADOS.md; esta documentação não substitui o ensaio. Consulte a auditoria antes de declarar qualquer requisito concluído.
+Ambos os integrantes devem executar cada rota, explicar os arrays de parâmetros SQL, seguir uma transação até o rollback e calcular uma fatura manualmente. O enunciado permite apoio de IA, mas exige compreensão e autoria efetiva. A validação MySQL foi realizada e registrada em CONFORMIDADE.md; esta documentação não substitui o ensaio. Consulte a auditoria antes de declarar qualquer requisito concluído.
 
 ## 13. Saúde financeira
 
