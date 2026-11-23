@@ -3,7 +3,6 @@
 -- Senha de demonstração para ambos: p@5sw0rd (não usar em contas reais).
 -- Hash bcrypt de referência verificado no teste oficial consistency:
 -- https://github.com/kelektiv/node.bcrypt.js/blob/master/test/implementation.test.js
--- A execução local de bcrypt.compare deste hash faz parte dos testes HTTP.
 USE api_financas;
 SET NAMES utf8mb4;
 START TRANSACTION;
@@ -28,7 +27,6 @@ INSERT INTO fontes_destinos (id, usuario_id, nome, tipo, dia_fechamento, dia_ven
 (5,2,'Conta corrente','conta',NULL,NULL,NULL),
 (6,2,'Cartão Bruno','cartao_credito',15,22,2000);
 
--- Três meses de compras/recebimentos: setembro, outubro e novembro de 2026.
 INSERT INTO lancamentos (id, usuario_id, tipo, descricao, valor, data, categoria_id, fonte_destino_id) VALUES
 (1,1,'entrada','Salário setembro',5000,'2026-09-05',1,1),
 (2,1,'saida','Aluguel setembro',1500,'2026-09-06',4,1),
@@ -48,7 +46,6 @@ INSERT INTO lancamentos (id, usuario_id, tipo, descricao, valor, data, categoria
 (16,2,'entrada','Salário Bruno novembro',3000,'2026-11-05',10,5),
 (17,2,'saida','Mercado Bruno novembro',500,'2026-11-10',12,6);
 
--- Todas as parcelas conservam a data da compra, como exige RF6.
 INSERT INTO lancamentos
 (id,usuario_id,tipo,descricao,valor,data,categoria_id,fonte_destino_id,parcela_atual,total_parcelas,grupo_parcelamento) VALUES
 (18,1,'saida','Curso parcelado',33.34,'2026-11-03',8,3,1,3,'11111111-1111-4111-8111-111111111111'),

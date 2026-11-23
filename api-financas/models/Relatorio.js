@@ -8,7 +8,6 @@ const arredondar = (numero) => Number(numero.toFixed(2));
 class Relatorio {
   async categorias(usuarioId, inicio, fim) {
     const anterior = periodoAnterior(inicio, fim);
-    // LEFT JOIN inclui categorias que tiveram movimento só no período anterior.
     const [linhas] = await pool.execute(`SELECT c.id, c.nome, c.tipo,
       COALESCE(SUM(CASE WHEN l.data BETWEEN ? AND ? THEN l.valor ELSE 0 END), 0) AS total,
       COALESCE(SUM(CASE WHEN l.data BETWEEN ? AND ? THEN l.valor ELSE 0 END), 0) AS anterior
@@ -19,14 +18,15 @@ class Relatorio {
     [inicio, fim, anterior.inicio, anterior.fim, inicio, fim, anterior.inicio, anterior.fim, usuarioId]);
     const grupo = (tipo) => {
       const categorias = linhas.filter((l) => l.tipo === tipo && (Number(l.total) > 0 || Number(l.anterior) > 0));
-      // Soma apenas os agregados já calculados pelo MySQL, nunca os lançamentos.
       const totalCentavos = categorias.reduce((soma, l) => soma + Math.round(Number(l.total) * 100), 0);
       const total = totalCentavos / 100;
       return { total, categorias: categorias.map((l) => {
         const atual = Number(l.total);
         const antes = Number(l.anterior);
+        let variacao = atual ? null : 0;
+        if (antes) variacao = arredondar((atual - antes) / antes * 100);
         return { id: l.id, nome: l.nome, total: atual, percentual: total ? arredondar(atual / total * 100) : 0,
-          anterior: antes, variacao: antes ? arredondar((atual - antes) / antes * 100) : atual ? null : 0 };
+          anterior: antes, variacao };
       }) };
     };
     return { periodo: { inicio, fim }, periodoAnterior: anterior, saidas: grupo('saida'), entradas: grupo('entrada') };

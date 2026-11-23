@@ -25,7 +25,6 @@ function calcularFatura(dataCompra, cartao, numeroParcela = 1) {
 function preverFaturas(cartoes, lancamentos, meses = 3, hoje = new Date().toISOString().slice(0, 10)) {
   return cartoes.map((cartao) => {
     const dias = { diaFechamento: cartao.dia_fechamento, diaVencimento: cartao.dia_vencimento };
-    // Cria a janela inteira, incluindo faturas sem compras.
     const faturas = Array.from({ length: meses }, (_, i) => ({
       ...calcularFatura(hoje, dias, i + 1), total: 0, lancamentos: [],
     }));

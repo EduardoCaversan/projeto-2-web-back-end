@@ -1,5 +1,3 @@
-// Preparação de demonstração, fora da API: usa os scripts SQL oficiais em banco NOVO.
-// Execute na pasta api-financas, depois de npm install e de configurar .env.
 require('dotenv').config({ quiet: true });
 const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
@@ -19,7 +17,6 @@ async function preparar() {
   const banco = 'api_financas_demo_' + randomUUID().replaceAll('-', '').slice(0, 12);
   const conexao = await mysql.createConnection({ ...admin, multipleStatements: true, connectTimeout: 3000 });
   try {
-    // Somente arquivos locais confiáveis; a API continua usando SQL parametrizado.
     const schema = fs.readFileSync('database/schema.sql', 'utf8').replaceAll('api_financas', banco);
     const seed = fs.readFileSync('database/seed.sql', 'utf8').replaceAll('api_financas', banco);
     await conexao.query(schema);

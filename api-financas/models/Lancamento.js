@@ -28,7 +28,6 @@ class Lancamento {
   async listar(usuarioId, filtros) {
     let condicao = ' WHERE l.usuario_id = ? AND l.data BETWEEN ? AND ?';
     const valores = [usuarioId, filtros.inicio, filtros.fim];
-    // Apenas fragmentos SQL fixos são concatenados; os valores sempre usam ?.
     for (const [campo, coluna] of [['tipo', 'l.tipo'], ['categoriaId', 'l.categoria_id'], ['fonteDestinoId', 'l.fonte_destino_id']]) {
       if (filtros[campo] !== undefined) { condicao += ` AND ${coluna} = ?`; valores.push(filtros[campo]); }
     }

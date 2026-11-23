@@ -21,7 +21,9 @@ app.use((erro, req, res, next) => {
   }
   if (erro.code === 'ER_DUP_ENTRY') {
     const mensagem = erro.sqlMessage || '';
-    const campo = mensagem.includes('uq_usuarios_cpf') ? 'cpf' : mensagem.includes('uq_usuarios_email') ? 'email' : 'nome';
+    let campo = 'nome';
+    if (mensagem.includes('uq_usuarios_cpf')) campo = 'cpf';
+    else if (mensagem.includes('uq_usuarios_email')) campo = 'email';
     return res.status(409).json({ erro: 'Registro já cadastrado.', campos: { [campo]: 'Já existe um registro com este campo.' } });
   }
   if (erro.code === 'ER_ROW_IS_REFERENCED_2' || erro.code === 'REGISTRO_VINCULADO') {
