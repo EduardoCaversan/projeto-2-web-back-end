@@ -1,16 +1,10 @@
-# Conformidade final — 23/11/2026
+# Conformidade técnica — 23/11/2026
 
-Eduardo Caversan da Silva Rocha — RA 2475391. **Trabalho individual.**
-Fonte de verdade: [enunciado, seções 11.1–11.12](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html).
-Leitura integral conferida contra o fonte oficial `12-projeto-api-controle-financeiro.Rmd`.
-O relatório independente fornecido pelo usuário foi confrontado com o código atual.
-O checklist inicial permanece no commit `1dc709c`; as decisões e evidências estão consolidadas abaixo.
+Eduardo Caversan da Silva Rocha — RA 2475391. Trabalho individual com apoio de IA no desenvolvimento e na revisão.
 
-**T** = testado automaticamente nesta revisão; **I** = inspecionado;
-**M** = validado manualmente pelo aluno (nenhuma nova evidência apresentada);
-**NV** = não verificado, depende de execução humana. Conexão simulada não comprova MySQL.
-“Concluído” descreve o requisito nos cenários exercitados, sem atribuir nota definitiva.
-“Parcial” indica parte técnica pronta com validação restante; “pendente” indica falta de evidência.
+Fonte: [enunciado oficial, seções 11.1–11.12](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html), relido nesta revisão. Swagger autorizado pela professora conforme comunicação do aluno; materiais de fala e estudo removidos conforme a mesma orientação.
+
+T = executado automaticamente; I = inspecionado; NV = não verificado. Os resultados abaixo descrevem cenários testados, não atribuem nota nem comprovam domínio oral.
 
 ## RF1–RF9
 
@@ -22,9 +16,9 @@ O checklist inicial permanece no commit `1dc709c`; as decisões e evidências es
 | RF4 | CRUD, tipos, filtro, duplicidade e vínculos | Categoria.js, routes/categorias.js | integracao: categorias/vínculos | concluído | T: CRUD, filtros, duplicidade por usuário e 409 vinculado |
 | RF5 | CRUD, tipos, cartão com dias/limite | FonteDestino.js, routes/fontesDestinos.js | integracao: fontes/cartões | concluído | T: CRUD, duplicidade, posse, campos inválidos e exclusão vinculada |
 | RF6 | CRUD, filtros, mês atual, 20/página, resumo, parcelas 1–48 e exclusões | Lancamento.js, routes/lancamentos.js, utils/parcelas.js | unidades; integracao: CRUD, páginas, PUT, UUID; banco: segunda parcela | concluído | T: 100/3, 20+1, resumo integral, UUID para 1 explícito, edição de todos os campos, demais parcelas intactas, rollback real e exclusão coletiva |
-| RF7 | SUM/GROUP BY, percentuais, comparação, variação, ordem e números | Relatorio.js, routes/relatorios.js, utils/datas.js | unidades: períodos; integracao: totais; APRESENTACAO: seed | concluído | T: totais conhecidos, comparação, ordenação e 25% em Alimentação; I: divisão por zero documentada |
-| RF8 | Entradas/fontes, saídas/destinos e saldo por conta | Relatorio.js, routes/relatorios.js | integracao; APRESENTACAO | concluído | T: saldo conhecido, isolamento e conta corrente do seed com 2700 em outubro |
-| RF9 | Fatura aberta, fronteiras, parcelas futuras, limites e meses 1–12 | utils/faturas.js, Relatorio.js, routes/relatorios.js | unidades: tabela oficial e calendário; integracao; APRESENTACAO | concluído | T: quatro exemplos oficiais, fevereiro/bissexto/dia31/virada, limite além da janela, 33,34/33,33/33,33 em faturas consecutivas |
+| RF7 | SUM/GROUP BY, percentuais, comparação, variação, ordem e números | Relatorio.js, routes/relatorios.js, utils/datas.js | unidades: períodos; integracao: totais | concluído | T: totais conhecidos, comparação, ordenação e 25% em Alimentação; I: divisão por zero documentada |
+| RF8 | Entradas/fontes, saídas/destinos e saldo por conta | Relatorio.js, routes/relatorios.js | integracao | concluído | T: saldo conhecido, isolamento e conta corrente do seed com 2700 em outubro |
+| RF9 | Fatura aberta, fronteiras, parcelas futuras, limites e meses 1–12 | utils/faturas.js, Relatorio.js, routes/relatorios.js | unidades: tabela oficial e calendário; integracao | concluído | T: quatro exemplos oficiais, fevereiro/bissexto/dia31/virada, limite além da janela, 33,34/33,33/33,33 em faturas consecutivas |
 | Desafio | Três indicadores, projeção mensal, dicas, aviso e isolamento | utils/saudeFinanceira.js, Relatorio.js, routes/saudeFinanceira.js | unidades: saúde; http; integracao: saúde | concluído | T: ausência de renda, meses vazios, virada, saldo negativo, limite da projeção, não duplicação de cartão e isolamento |
 
 ## Critérios oficiais — pontos possíveis, não notas atribuídas
@@ -46,168 +40,27 @@ O checklist inicial permanece no commit `1dc709c`; as decisões e evidências es
 | 13. HTTP/erros | 4 | T: 200/201/204/400/401/404/409, JSON; I: 500 genérico sem detalhes internos | concluído |
 | 14. SQL/restrições | 4 | I: placeholders e fragmentos fixos; T: oito rejeições UNIQUE/CHECK/FK | concluído |
 | 15. Arquivos/docs/testes | 3 | I: artefatos exigidos; T: instalação, 22 rotas cobertas, blocos PowerShell executados | concluído |
-| 16. Explicação do código-fonte | 5 | NV: guias não comprovam domínio oral do aluno | pendente |
+| 16. Explicação do código-fonte | 5 | NV: domínio oral do aluno não verificado | pendente |
 | 17. Execução pela linha de comando | 5 | T: ferramentas e comandos funcionaram; NV: execução do aluno não presenciada | pendente |
-| 18. Sete tópicos em até 10min | 5 | I: roteiro de 9 minutos + 1 minuto de margem; NV: ensaio oral cronometrado não realizado | pendente |
+| 18. Sete tópicos em até 10min | 5 | NV: apresentação cronometrada não realizada | pendente |
 | Desafio | +10 | T: três indicadores, três meses, regras e aviso; atribuição dos pontos pela professora | concluído |
 
-## Decisões e simplificação
 
-- PUT é individual: todos os campos editáveis podem mudar; UUID/numeração permanecem.
-  Não propaga nem reparcela. Mesma data é garantida na criação; edição pode corrigi-la.
-  Tipo deve combinar com categoria; referências precisam pertencer ao dono. RF9 usa
-  somente saídas em cartão, com os campos atuais. A edição individual evita reprocessamento de grupos não exigido por RF6.
-- Parcelamento explícito, inclusive 1 vez, exige saída em cartão e gera UUID.
-  Campo omitido significa lançamento simples com grupo nulo. Sem parcela zero.
-- RF7: mês completo compara com mês calendário anterior, conforme outubro/setembro
-  oficial; intervalo parcial compara igual número inclusivo de dias. Variação com
-  anterior zero e atual positivo é null.
-- RF9: janela começa na fatura aberta e mantém vazias. Utilizado inclui vencimento
-  hoje e além da janela. Disponível pode ser negativo; pagamentos não são modelados.
-- Saúde: médias de três meses completos, mês vazio zero; razões sem renda null;
-  projeção mensal usa despesas fora do cartão mais faturas, sem dupla contagem.
-  Fórmulas e limiar didático de 30% estão no README.
-- Removidos consulta redundante e ramo de erro do PUT. Consulta de cartões passou
-  a ser compartilhada por faturas e saúde. Mantidos locks, transações, validações e
-  testes úteis. Nenhum framework, biblioteca, tabela ou camada adicional.
-- SQL da aplicação fica nos models. Schema/seed e scripts de preparação/teste do
-  banco são infraestrutura de demonstração; não são rotas nem acesso da aplicação.
+## Registros desta revisão
 
-## Checklist oficial e entrega
+Antes do Swagger: 29 testes unitários/simulados, 6 HTTP e 13 subtestes de integração MySQL (14 incluindo agrupador), todos aprovados e sem ignorados. Após adicionar Swagger: quatro testes de documentação, seis HTTP, 13 subtestes de integração e quatro subtestes de banco (cinco incluindo agrupador), todos aprovados. Os exemplos OpenAPI executaram as 22 operações em API/MySQL reais. Catálogo PowerShell: 23 blocos aprovados em dois bancos distintos.
 
-- [x] T: e-mail em maiúsculas e CPF pontuado duplicados recebem 409.
-- [x] T: UNIQUE rejeita duplicidade sem SELECT prévio.
-- [x] T/I: respostas verificadas sem senha_hash; seleção explícita de campos públicos.
-- [x] T: token ausente, inválido ou expirado recebe 401 JSON.
-- [x] T: trocar ID não permite leitura, edição ou exclusão de dados alheios.
-- [x] T: saída não aceita categoria de entrada.
-- [x] T: 100/3 conserva centavos.
-- [x] T: compra no fechamento vai ao mês seguinte.
-- [x] T: relatórios retornam números.
-- [x] I: .env, .local e node_modules ignorados; .env.example e lockfile versionados.
-- [ ] NV: outra pessoa reproduziu a instalação usando apenas README.
-- [ ] NV: ensaio oral individual cronometrado e domínio do código por Eduardo.
-- [ ] NV: confirmar publicação atual e enviar link. Origin já configurado; nenhum push nesta revisão.
+Chrome headless com perfil isolado: 22 operações renderizadas, nenhuma mensagem de erro, login pelo Try it out, Authorize e consultas /auth/me e /saude-financeira com HTTP 200. Captura de tela inspecionada. Esses testes técnicos não comprovam apresentação pelo aluno.
 
-Eduardo informou que realizará o trabalho sozinho. A documentação e o roteiro
-consideram somente sua autoria e apresentação. Não há comprovação manual nova do
-aluno; não se afirma nota 100/100, publicação ou conclusão da apresentação.
-Execuções reais detalhadas abaixo.
-## Inventário documental e revisão de 15/11/2026
+Iniciador renomeado para iniciar.ps1: duas execuções com bancos novos, Ctrl+C liberando porta, MySQL indisponível e configuração JWT inválida recusados com código 1. Porta ocupada recusada sem encerrar a API existente. .env preservado. Validações de instalação e regressão final serão complementadas abaixo.
 
-Inspeção inicial: Git limpo em b77fffd, master e identidade preservados. Enunciado
-integral relido (fonte oficial SHA 4ce9499830f2da9ba114722441a96a27dde955d9).
-Não foi encontrado código morto ou abstração que justifique alterar a aplicação.
-Comentários sobre calendário, centavos, isolamento e transações têm finalidade concreta.
-Schema/seed e lógica foram preservados; a intervenção concentra-se nos documentos
-e no auxiliar de comandos de apresentação. Baseline desta rodada: 29 testes
-unitários/simulados e 6 HTTP executados e aprovados, sem ignorados.
+## Arquivos e política acadêmica
 
-| Markdown inventariado | Classificação | Destino e informação preservada |
-|---|---|---|
-| README.md | Obrigatório; instalação e execução | Manter como entrada curta, com configuração e links |
-| testes/requisicoes.md | Obrigatório; referência HTTP | Reformular como Modo B, com as 22 rotas e curl.exe |
-| docs/APRESENTACAO.md | Necessário para apresentação | Modo A com comandos na ordem e sete tópicos |
-| docs/AMBIENTE-LOCAL.md | Necessário para execução local | Manter início/parada do portátil e credenciais administrativas locais |
-| docs/EXPLICACAO-CODIGO.md | Necessário para estudo | Manter fluxo, transações e explicações com código |
-| docs/PERGUNTAS-BANCA.md | Necessário para estudo | Manter perguntas; corrigir semântica de datas após PUT |
-| docs/CONFORMIDADE.md | Evidência de conformidade e testes | Concentrar matriz, execuções e pendências humanas |
-| docs/CHEATSHEET.md | Redundante com roteiro | Removido; comandos e diagnóstico integrados em APRESENTACAO.md |
-| docs/RESULTADOS.md | Evidência útil, arquivo separado redundante | Removido; resultados e limites consolidados abaixo |
-| docs/REVISAO-FINAL.md | Histórico intermediário de auditoria | Removido; decisão do PUT e justificativas acima; histórico no Git |
+- README: instalação, configuração, operação, regras e limites dos indicadores.
+- AMBIENTE-LOCAL: caminhos e comandos do MySQL portátil.
+- requisicoes.md: curl para todas as rotas, exigido pelo enunciado; executor preservado como teste sem pausas.
+- openapi.json: contrato técnico interativo das 22 operações.
+- CONFORMIDADE: evidências e critérios; histórico anterior permanece no Git.
+- Removidos APRESENTACAO.md, PERGUNTAS-BANCA.md e EXPLICACAO-CODIGO.md, não exigidos pelo enunciado.
 
-Os três documentos removidos não são exigidos pela professora. Conferidos conteúdo
-exclusivo e referências antes da consolidação: dez Markdown passam a sete, mantendo
-instalação, estudo, apresentação, catálogo HTTP e evidências. Histórico integral no Git.
-
-## Escopo das mudanças de 15–16/11/2026
-
-| Classe | Ação |
-|---|---|
-| Correção funcional obrigatória | Nenhuma falha reproduzível na aplicação; RF1–RF9 e desafio preservados |
-| Correção documental | Datas após PUT, funções reais, catálogo HTTP e comandos Windows |
-| Simplificação segura | Unificação de roteiro/consulta rápida e das evidências de auditoria |
-| Melhoria solicitada | Iniciador de 68 linhas reutilizando preparar-demo.js; executor dos próprios blocos Markdown |
-| Intervenção humana | Domínio do código, ensaio individual, reprodução independente e entrega |
-
-Locks, transações, rollback, SQL parametrizado, validações, verificação de dono e
-comentários financeiros têm finalidade concreta e foram mantidos. Nenhum helper
-ou comentário da aplicação exigiu remoção. O auxiliar curl usa arquivo UTF-8 por
-compatibilidade com PowerShell 5.1; o executor lê somente blocos do próprio repositório,
-evitando duas cópias dos comandos. Não são camadas da API.
-
-## Evidências reexecutadas em 23/11/2026
-
-Windows PowerShell 5.1, Node 22.12.0, npm 10.9.0 e MySQL 8.4.13 real em 3307.
-Git iniciou limpo em 80c419d. O enunciado publicado foi relido integralmente, incluindo
-11.1–11.12. A inspeção confirmou que o código já é simples e que a explicação do PUT
-já está correta. Nenhum arquivo da aplicação, teste automatizado, schema, seed ou dependência
-precisou mudar. O .env manteve o mesmo hash SHA-256 antes e depois da execução.
-
-Melhorias desta rodada: índice com 22 links internos no catálogo, parâmetros explícitos
-nas rotas sem path/query e remoção de linhas vazias excedentes; início direto por
-npm/nodemon na etapa oficial, evitando iniciar e reiniciar a API. Mantidos os sete
-Markdown e todos os comentários que explicam regras, isolamento e transações.
-
-| Comando/verificação | Resultado efetivamente observado |
-|---|---|
-| `npm test` | 29 aprovados: 25 puros + 4 com conexão simulada; zero falhas/ignorados |
-| `npm run test:http` | 6 aprovados; Express/JWT/bcrypt reais, sem consultas MySQL; zero falhas/ignorados |
-| `$env:EXECUTAR_INTEGRACAO='1'; npm run test:integracao` | 14 aprovados = 13 subtestes + principal, API/MySQL reais; zero falhas/ignorados |
-| `$env:EXECUTAR_BANCO='1'; node --test testes/banco.test.js` | 5 aprovados = 4 subtestes + principal, banco exclusivo; zero falhas/ignorados |
-| Schema/seed e restrições | 2 usuários, 18 categorias, 6 fontes, 30 lançamentos; UNIQUE, CHECK e FK recusaram SQL inválido |
-| Rollback real | Falha na categoria desfez usuário; falha na segunda parcela desfez a primeira; conexão reutilizável |
-| `npm ls --depth=0` | Somente as sete dependências permitidas, nas versões anteriores |
-| Instalação sem dependências | Teste histórico de 16/11: npm ci instalou 126 pacotes em cópia isolada; não repetido em 23/11 |
-| `npm install --offline --no-audit --no-fund`; `npm run dev` | Instalação sem mudança deliberada de versões e API iniciada por nodemon |
-| `executar-exemplos.ps1 -Modo A -SemPausas` | Cinco blocos HTTP completos; status esperados, totais e limites conferidos |
-| `executar-exemplos.ps1 -Modo B -SemPausas` | 23 blocos (preparação + 22 rotas); JSON e 204 sem corpo conferidos |
-| Repetição A/B | Ambos executados em duas bases: api_financas_demo_bd61be1f51e4 e api_financas_demo_7ecace1cbb41 |
-| Totais da apresentação | Ana/outubro: 5200 entradas, 5500 saídas, Alimentação 1000/800 = 25%, conta corrente 2700; demo: 33,34/33,33/33,33, limite 100/1100 |
-| Preservação | .env com hash idêntico antes/depois; lockfile, schema, seed, models, routes, utils, middleware, server e testes automatizados sem diff contra 80c419d |
-| Sintaxe e links | 7 Markdown, 47 blocos PowerShell, 28 JSON, 19 links locais e 26 JS conferidos; 22 âncoras do catálogo resolvidas; scripts PowerShell sem erros de parser |
-| Schema oficial | Inspecionado contra o enunciado relido; SQL permaneceu idêntico ao estado já validado |
-| Exemplos README | Login, /auth/me e /saude-financeira executados com curl.exe, HTTP 200 |
-| Modo A interativo | Validado em 16/11 com Enter nos cinco blocos; nesta rodada A/B foram repetidos com -SemPausas |
-
-Integração desta rodada na base api_financas_demo_bd61be1f51e4. A suíte administrativa criou
-seu próprio banco api_financas_teste_*, sem apagar o original. Bancos fictícios ficam
-para inspeção; nenhuma remoção automática. Cópia de instalação e arquivos temporários
-permanecem ignorados. Nenhum segredo ou nova biblioteca foi versionado.
-
-### Cenários históricos do iniciador — 15–16/11/2026
-
-Tabela preservada como evidência histórica. Em 23/11 repetimos a partida com banco
-novo e o encerramento por Ctrl+C; os demais cenários abaixo não foram repetidos.
-
-| Cenário executado | Evidência |
-|---|---|
-| Primeira e segunda execuções | Bancos distintos, login e /auth/me 200; API permanece em execução |
-| Dependências já instaladas | Sem npm ci nas partidas normais |
-| Dependências ausentes | .local/teste-iniciador sem node_modules instalou pelo lockfile e iniciou |
-| Porta 3000 ocupada | Código 1 antes do preparo; arquivo do banco e PID existente inalterados |
-| MySQL indisponível | Porta inacessível e servidor realmente desligado: ECONNREFUSED, código 1, sem novo preparo |
-| Configuração inválida | JWT de exemplo e DB_USER vazio recusados com código 1 antes de criar banco |
-| Ctrl+C | Repetido em duas execuções; somente API própria encerrada, porta 3000 liberada |
-| Dados sensíveis | Login capturado internamente; nenhuma senha/token/arquivo privado exibido pelo iniciador |
-
-A validação encontrou e corrigiu aspas na chamada Node no PowerShell 5.1, detecção de
-listener IPv6 na porta 3000 e leitura de corpo vazio 204 no auxiliar. Tentativas que
-falharam não foram contadas como aprovação; os cenários foram repetidos após correção.
-O iniciador também confere o PID do listener após iniciar a API, para não aceitar
-resposta de um servidor alheio. Nenhum processo de terceiros foi encerrado.
-
-### Histórico e limites de comprovação
-
-A revisão de 09/11 registrou baseline 26/6/11 e final 29/6/14/5, instalação, auditoria
-npm então sem vulnerabilidades e ensaio técnico HTTP em 3001. Documentos completos
-recuperáveis em b77fffd. Não atribuímos esses testes ao aluno nem os contamos
-como execução nova. Não houve nova auditoria de vulnerabilidades nesta rodada.
-As 15.876 combinações da auditoria independente não foram reexecutadas em suíte
-separada; os testes de calendário versionados foram reexecutados.
-
-Comandos HTTP automáticos levam segundos; isso **não mede fala nem navegação**.
-O roteiro planeja nove minutos, mas critérios 16–18 continuam pendentes de
-apresentação/ensaio individual por Eduardo. Identidade Git preservada; origin encontrado:
-https://github.com/EduardoCaversan/projeto-2-web-back-end.git. Nenhum push ou envio de
-link nesta revisão. Pontuação e aceitação final cabem à professora.
+Identificação individual informada. Commits mantêm a identidade configurada; nenhum push autorizado. Domínio do código, apresentação, reprodução independente da instalação, publicação e envio do link dependem do aluno. Não há contribuição atribuída a outra pessoa.

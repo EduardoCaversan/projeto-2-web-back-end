@@ -29,22 +29,21 @@ try {
     $env:DB_NAME = (Get-Content .local/demo-banco.txt -Raw).Trim()
     if ($env:DB_NAME -notmatch '^api_financas_demo_[a-f0-9]{12}$') { throw 'Nome do banco de demonstracao invalido.' }
     $env:PORT = '3000'
-    $api = Start-Process -FilePath $node -ArgumentList 'server.js' -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput '.local/apresentacao-out.log' -RedirectStandardError '.local/apresentacao-erro.log'
+    $api = Start-Process -FilePath $node -ArgumentList 'server.js' -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput '.local/api-out.log' -RedirectStandardError '.local/api-erro.log'
 
     $pronta = $false
     for ($tentativa = 0; $tentativa -lt 20; $tentativa++) {
-        if ($api.HasExited) { throw 'API encerrou durante a inicializacao. Consulte .local/apresentacao-erro.log.' }
+        if ($api.HasExited) { throw 'API encerrou durante a inicializacao. Consulte .local/api-erro.log.' }
         try { Invoke-WebRequest 'http://127.0.0.1:3000/auth/me' -UseBasicParsing -TimeoutSec 1 | Out-Null }
         catch { if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 401) { $pronta = $true } }
         if ($pronta) { break }
         Start-Sleep -Milliseconds 250
     }
-    if (!$pronta) { throw 'A API nao respondeu em tempo. Consulte .local/apresentacao-erro.log.' }
+    if (!$pronta) { throw 'A API nao respondeu em tempo. Consulte .local/api-erro.log.' }
     if ($api.HasExited -or !(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Where-Object OwningProcess -eq $api.Id)) {
         throw 'A porta 3000 foi ocupada por outro processo durante a inicializacao.'
     }
 
-    # Login e leitura confirmam tambem a conexao da API ao banco novo.
     try {
         $login = Invoke-RestMethod 'http://127.0.0.1:3000/auth/login' -Method Post -ContentType 'application/json' -Body '{"email":"ana@example.com","senha":"p@5sw0rd"}' -TimeoutSec 10
         $usuario = Invoke-RestMethod 'http://127.0.0.1:3000/auth/me' -Headers @{Authorization=('Bearer '+$login.token)} -TimeoutSec 10
@@ -52,10 +51,10 @@ try {
     } catch { throw 'Verificacao de login/leitura falhou. Confira o log local da API e as credenciais do banco.' }
     $login = $null
     Write-Host "Pronto: http://127.0.0.1:3000 | Banco: $env:DB_NAME"
-    Write-Host 'Abra docs/APRESENTACAO.md. Execute os blocos do Modo A em outro terminal.'
+    Write-Host 'Swagger: http://127.0.0.1:3000/api-docs'
     Write-Host 'Mantenha este terminal aberto. Ctrl+C encerra somente esta API.'
     while (!$api.HasExited) { Start-Sleep -Milliseconds 250 }
-    if ($api.ExitCode -ne 0) { throw 'API encerrou com erro. Consulte .local/apresentacao-erro.log.' }
+    if ($api.ExitCode -ne 0) { throw 'API encerrou com erro. Consulte .local/api-erro.log.' }
 } catch {
     Write-Host ('Falha: ' + $_.Exception.Message) -ForegroundColor Red
     $codigo = 1

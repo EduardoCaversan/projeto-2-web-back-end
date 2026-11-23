@@ -1,291 +1,179 @@
-# API de controle financeiro pessoal
+# API Finanças
 
-Projeto acadêmico de **Programação Web Back-end**, implementado conforme [o enunciado da professora Juliana Costa Silva](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html), seções 11.1 a 11.12.
+Projeto de Programação Web Back-end da UTFPR: controle financeiro pessoal com autenticação, cadastros, lançamentos, relatórios, faturas e saúde financeira.
 
-**Aluno:** Eduardo Caversan da Silva Rocha — **RA:** 2475391.
-**Modalidade:** trabalho individual.
+**Eduardo Caversan da Silva Rocha — RA 2475391. Trabalho individual.**
+Desenvolvido e revisado com apoio de IA. Swagger autorizado pela professora conforme comunicação do aluno. Requisitos: [enunciado oficial](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html).
 
-A API cadastra usuários, autentica com JWT, mantém categorias, fontes/destinos e lançamentos privados, divide compras em parcelas e retorna relatórios e faturas em JSON. O objetivo é aplicar Express, classes de modelo, MySQL, transações e autenticação estudados na disciplina. Não há interface gráfica.
+## Pré-requisitos
 
-**Estado técnico:** RF1–RF9 e desafio implementados e preservados. Evidências, testes
-executados e pendências humanas em [CONFORMIDADE](docs/CONFORMIDADE.md).
+- Node.js 22+ com npm.
+- MySQL Server 8.0.16+ iniciado, com CHECK efetivo.
+- Windows PowerShell 5.1+.
+- .env e .local/admin.json configurados conforme abaixo. Nesta máquina, preserve os arquivos prontos e inicie o [MySQL portátil](docs/AMBIENTE-LOCAL.md).
 
-## Apresentação com um comando
+## Inicialização rápida
 
-Com MySQL iniciado e `.env` / `.local/admin.json` configurados conforme
-[AMBIENTE-LOCAL](docs/AMBIENTE-LOCAL.md), abra PowerShell na pasta `api-financas`:
-
-```powershell
-.\iniciar-apresentacao.ps1
-```
-
-O script verifica Node.js/npm, configuração, MySQL e porta 3000; instala com
-`npm ci` apenas se as dependências estiverem ausentes/incompatíveis; reutiliza
-`testes/preparar-demo.js` para importar schema/seed em banco novo; inicia a API e
-confirma login e leitura. Preserva `.env`, banco original e versões do lockfile.
-Deixe o terminal aberto; **Ctrl+C** encerra somente a API criada pelo script.
-Não encerra processos que já ocupem a porta. Bancos de ensaio ficam disponíveis
-para inspeção, sem remoção automática. O MySQL precisa estar ligado previamente.
-
-Abra [docs/APRESENTACAO.md](docs/APRESENTACAO.md). Em outro terminal na mesma pasta:
-
-```powershell
-.\testes\executar-exemplos.ps1
-```
-
-O roteiro pausa entre etapas, obtém tokens/IDs automaticamente e confere os status.
-O iniciador usa `node server.js`; a demonstração de `npm run dev` exigida na
-avaliação está indicada no roteiro. Se a política local bloquear o script, use
-`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-apresentacao.ps1`,
-sem alterar a política global.
-
-## Tecnologias e organização
-
-Node.js 22+, JavaScript CommonJS, Express 5, mysql2/promise, jsonwebtoken, express-jwt, bcrypt, dotenv. Nodemon somente no desenvolvimento. Testes usam `node:test`, `node:assert` e `fetch` nativos. Nenhum ORM, framework adicional ou dependência de testes.
-
-```text
-api-financas/
-├── database/   connection.js, schema.sql, seed.sql
-├── middleware/ auth.js
-├── models/     Usuario.js, Categoria.js, FonteDestino.js, Lancamento.js, Relatorio.js
-├── routes/     auth.js, categorias.js, fontesDestinos.js, lancamentos.js, relatorios.js, saudeFinanceira.js
-├── utils/      cpf.js, validacao.js, datas.js, parcelas.js, faturas.js, saudeFinanceira.js
-├── testes/     requisicoes.md, comandos.ps1, executar-exemplos.ps1, unidades.test.js,
-│               transacoes.test.js, http.test.js, integracao.test.js, banco.test.js, preparar-demo.js
-├── docs/       APRESENTACAO.md, AMBIENTE-LOCAL.md, CONFORMIDADE.md,
-│               EXPLICACAO-CODIGO.md, PERGUNTAS-BANCA.md
-├── iniciar-apresentacao.ps1
-├── .env.example
-├── .gitignore
-├── package.json
-├── README.md
-└── server.js
-```
-
-O lockfile e as versões diretas estão fixados. Não há dependências adicionais de testes.
-
-## Instalação no Windows PowerShell
-
-Pré-requisitos: Node.js **22 ou superior**, npm, MySQL Server **8.0.16 ou superior** com InnoDB e `CHECK` efetivo (por exemplo MySQL 8.4) e `curl.exe`. O cliente `mysql.exe` pode ser chamado pelo caminho completo; não precisa estar no PATH. O MySQL Workbench sozinho não substitui o servidor. Instale o servidor pelo [site oficial MySQL](https://dev.mysql.com/downloads/mysql/). Nesta máquina, use o [MySQL portátil já preparado](docs/AMBIENTE-LOCAL.md), na porta 3307; em instalações convencionais, a porta usual é 3306.
-
-Todos os comandos a seguir, exceto `cd`, partem da pasta `api-financas`:
+Na raiz do repositório:
 
 ```powershell
 cd .\api-financas
-node --version
-npm --version
-npm install
+.\iniciar.ps1
 ```
 
-Se o PowerShell bloquear `npm.ps1`, use `npm.cmd` nos mesmos comandos. Não é necessário alterar a política de execução global.
+- API: **http://localhost:3000**
+- Swagger: **http://localhost:3000/api-docs**
+- Especificação: **http://localhost:3000/api-docs/openapi.json**
+- Encerramento: **Ctrl+C** no terminal do iniciador.
 
-### 1. Criar banco e importar dados
+O script verifica Node/npm, configuração, MySQL e porta 3000. Instala com npm ci somente se faltarem dependências ou as versões diretas divergirem. Reutiliza testes/preparar-demo.js para importar schema/seed em banco novo e selecionar DB_NAME apenas na sessão da API. Confirma login/leitura antes de informar sucesso. Preserva .env, banco original e processos alheios. O MySQL continua ativo após encerrar a API.
 
-Com o servidor MySQL iniciado, escolha o caminho do cliente e a porta da sua instalação. O schema cria `api_financas`, suas quatro tabelas e restrições. Não executa `DROP` nem substitui tabelas existentes. Importe o seed **uma vez**, após o schema, sem usuários existentes; repetir gera duplicidade. No ambiente local pronto, pule esta importação: o banco já está carregado.
+Cada execução deixa um banco api_financas_demo_* independente. A raiz / retorna 404 JSON.
+
+## Configuração em outra máquina
+
+Todos os comandos abaixo partem da pasta api-financas. O cliente MySQL pode ser chamado pelo caminho completo, sem estar no PATH.
+
+### Banco inicial e usuário da API
+
+Em uma instalação nova, importe schema e seed uma única vez:
 
 ```powershell
-$mysql = 'C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe' # ajuste ao local instalado
+$mysql = 'C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe'
 $portaMysql = 3306
-# Alternativa portátil nesta máquina:
-# $mysql = (Resolve-Path '.local/mysql-8.4.13-winx64/bin/mysql.exe').Path
-# $portaMysql = 3307
-& $mysql --version
 & $mysql --host=127.0.0.1 --port=$portaMysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/schema.sql"
 & $mysql --host=127.0.0.1 --port=$portaMysql -u root -p --default-character-set=utf8mb4 --execute="SOURCE database/seed.sql"
+& $mysql --host=127.0.0.1 --port=$portaMysql -u root -p
 ```
 
-O `-p` solicita a senha no terminal. Não coloque sua senha real no comando ou nos arquivos versionados. `SOURCE` evita o operador `<`, que não funciona como redirecionamento de entrada no Windows PowerShell.
-
-Crie um usuário local para a aplicação no cliente interativo `& $mysql --host=127.0.0.1 --port=$portaMysql -u root -p`:
+Ajuste caminho e porta. No cliente interativo, substitua a senha fictícia localmente:
 
 ```sql
 CREATE USER 'financas'@'127.0.0.1' IDENTIFIED BY 'SUBSTITUA_POR_SENHA_LOCAL';
 GRANT SELECT, INSERT, UPDATE, DELETE ON api_financas.* TO 'financas'@'127.0.0.1';
+EXIT;
 ```
 
-Substitua o texto fictício por sua senha. Em instalação que utiliza contas `@localhost`, mantenha o host da conta MySQL coerente com `DB_HOST`. As tabelas são criadas pelo administrador; a aplicação precisa somente dos quatro privilégios acima. `FLUSH PRIVILEGES` não é necessário após `CREATE USER`/`GRANT`.
+O seed contém 2 usuários, 18 categorias, 6 fontes/destinos e 30 lançamentos de setembro a novembro de 2026. Não reimporte sobre tabelas existentes.
 
-Para verificar a carga no cliente MySQL:
-
-```sql
-USE api_financas;
-SELECT VERSION();
-SHOW CREATE TABLE lancamentos;
-SELECT COUNT(*) AS usuarios FROM usuarios;
-SELECT COUNT(*) AS lancamentos FROM lancamentos;
-```
-
-Resultados esperados do seed intacto: **2 usuários, 18 categorias, 6 fontes/destinos, 30 lançamentos**. `SHOW CREATE TABLE` deve mostrar FK, `ck_valor`, `ck_parcelas` e o índice `(usuario_id, data)`.
-
-### 2. Configurar ambiente
+### Arquivos locais
 
 ```powershell
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+New-Item -ItemType Directory -Force .local | Out-Null
 notepad .env
 ```
 
-Copie a chave aleatória impressa para `JWT_SECRET` e configure:
-
-```dotenv
-PORT=3000
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USER=financas
-DB_PASSWORD=sua_senha_local
-DB_NAME=api_financas
-JWT_SECRET=sua_chave_aleatoria_gerada
-```
-
-Use `DB_PORT=3307` no portátil, ou a porta escolhida na instalação. Preserve o `.env` já pronto nesta máquina. `.env`, `.local/` e `node_modules/` estão ignorados. Não compartilhe a chave gerada. O servidor recusa a chave de exemplo. Datas SQL chegam como strings devido a `dateStrings: true`; cálculos usam UTC.
-
-### 3. Executar
+Preencha DB_HOST, DB_PORT, DB_USER, DB_PASSWORD e DB_NAME. Use DB_NAME=api_financas, host 127.0.0.1 e a conta criada acima. Porta padrão: 3306; portátil desta máquina: 3307. Para substituir somente a chave fictícia, sem imprimi-la:
 
 ```powershell
-npm start
+node -e "const fs=require('node:fs');const p='.env';const s=fs.readFileSync(p,'utf8');fs.writeFileSync(p,s.replace('troque_por_uma_chave_aleatoria_longa',require('node:crypto').randomBytes(32).toString('hex')));"
+notepad .local/admin.json
 ```
 
-Ou, durante alterações:
+Grave a conexão administrativa local (exemplo fictício):
 
-```powershell
-npm run dev
+```json
+{"host":"127.0.0.1","port":3306,"user":"root","password":"SUBSTITUA_LOCALMENTE"}
 ```
 
-O servidor escuta em `http://127.0.0.1:3000`. Encerre com Ctrl+C. `/` devolve 404 JSON, pois não há rota inicial no enunciado. O pool conecta ao banco quando recebe a primeira consulta: a mensagem de servidor iniciado, sozinha, **não comprova conexão com MySQL**. Confirme pelo login do seed.
+O administrador deve poder criar bancos e conceder privilégios ao DB_USER no host DB_HOST. As duas conexões devem apontar para a mesma instância MySQL. .env, .local/, node_modules/ e arquivos temporários estão ignorados no Git.
 
-## Autenticação e primeira requisição
+## Uso do Swagger
 
-Credenciais fictícias: `ana@example.com` e `bruno@example.com`; senha de ambos: **`p@5sw0rd`**. Os CPFs de teste são `52998224725` e `11144477735`. Nenhum corresponde a dados fornecidos pelo aluno. O seed usa um vetor de teste bcrypt publicado pela própria biblioteca; a origem está comentada no SQL e a correspondência é testada em `http.test.js`.
+Abra /api-docs. Execute POST /auth/cadastro ou use uma conta fictícia do seed. Em POST /auth/login, clique em **Try it out**, preencha o JSON e clique em **Execute**. Copie o campo token, clique em **Authorize** e cole somente o token, sem o prefixo Bearer. As operações protegidas passam a enviar o header automaticamente. O token expira em uma hora; a autorização não é persistida ao recarregar a página.
 
-Em outro terminal, na mesma pasta:
+Contas fictícias: ana@example.com e bruno@example.com, senha p@5sw0rd. Os exemplos de lançamentos usam IDs da Ana no seed intacto; para outro usuário, consulte suas categorias e fontes. Datas e resultados de faturas dependem do dia da consulta.
+
+docs/openapi.json documenta as 22 operações, separado das rotas. Só cadastro e login são públicos; arquivos do Swagger são públicos, sem acesso a dados privados. A referência curl exigida está em [testes/requisicoes.md](testes/requisicoes.md).
+
+## Alternativa manual
+
+Com MySQL e arquivos locais configurados:
 
 ```powershell
-. .\testes\comandos.ps1
-$status = curl.exe @curlArgs -X POST "$baseApi/auth/login" -H 'Content-Type: application/json' --data-binary (Salvar-Json @{email='ana@example.com'; senha='p@5sw0rd'})
-$token = (Ler-Resposta $status 200).token
-$status = curl.exe @curlArgs "$baseApi/auth/me" -H "Authorization: Bearer $token"
-Ler-Resposta $status 200 | ConvertTo-Json
+npm.cmd ci
+node testes/preparar-demo.js
+if ($LASTEXITCODE -ne 0) { throw 'Falha ao preparar banco' }
+$env:DB_NAME = (Get-Content .local/demo-banco.txt -Raw).Trim()
+npm.cmd run dev
 ```
 
-Os auxiliares apenas gravam/leem JSON para evitar problemas de aspas no PowerShell;
-não pertencem à aplicação. O JWT HS256 dura **1 hora**, contém `id`, `nome` e `email`, e deve ser enviado em `Authorization: Bearer TOKEN`. O conteúdo do JWT é legível; assinatura não é criptografia. A senha não vai no token nem nas respostas. Após expirar, faça login novamente.
+npm.cmd install também instala usando o lockfile; npm.cmd start inicia sem nodemon. Após Ctrl+C, execute Remove-Item Env:DB_NAME. Para usar o banco original preparado, execute npm.cmd start sem DB_NAME definido na sessão.
 
-## Rotas
+## Organização e tecnologias
 
-Todas exigem JWT, exceto os dois POSTs de autenticação. GETs de detalhe de categoria/fonte são complementares ao mínimo e ajudam a verificar isolamento.
+JavaScript CommonJS, Express Router, mysql2/promise, jsonwebtoken, express-jwt, bcrypt, dotenv e swagger-ui-express. Nodemon somente no desenvolvimento. Versões exatas e lockfile versionados. Testes com recursos nativos do Node.js e PowerShell.
 
-| Método | Rota | Sucesso | Uso |
-|---|---|---:|---|
-| POST | `/auth/cadastro` | 201 | nome, email, cpf, senha |
-| POST | `/auth/login` | 200 | email e senha |
-| GET | `/auth/me` | 200 | usuário autenticado |
-| GET | `/categorias` | 200 | filtro `tipo` opcional |
-| GET | `/categorias/:id` | 200 | detalhe |
-| POST | `/categorias` | 201 | nome e tipo |
-| PUT | `/categorias/:id` | 200 | nome e tipo completos |
-| DELETE | `/categorias/:id` | 204 | sem lançamentos vinculados |
-| GET | `/fontes-destinos` | 200 | filtro `tipo` opcional |
-| GET | `/fontes-destinos/:id` | 200 | detalhe |
-| POST | `/fontes-destinos` | 201 | nome, tipo; campos do cartão |
-| PUT | `/fontes-destinos/:id` | 200 | substitui campos editáveis |
-| DELETE | `/fontes-destinos/:id` | 204 | sem lançamentos vinculados |
-| GET | `/lancamentos` | 200 | inicio, fim, tipo, categoriaId, fonteDestinoId, pagina |
-| GET | `/lancamentos/:id` | 200 | detalhe de uma parcela |
-| POST | `/lancamentos` | 201 | lançamento ou parcelas |
-| PUT | `/lancamentos/:id` | 200 | atualiza o registro individual |
-| DELETE | `/lancamentos/:id` | 204 | `todasParcelas=true` exclui o grupo |
-| GET | `/relatorios/categorias` | 200 | inicio e fim obrigatórios |
-| GET | `/relatorios/fontes-destinos` | 200 | inicio e fim obrigatórios |
-| GET | `/relatorios/faturas` | 200 | meses opcional, de 1 a 12, padrão 3 |
-| GET | `/saude-financeira` | 200 | indicadores, projeção e dicas do usuário autenticado |
-
-Erro tem sempre `{ "erro": "..." }`, com `campos` quando aplicável. Status: **400** dados inválidos; **401** token/credenciais inválidos; **404** ausente ou pertencente a outro usuário; **409** duplicidade ou vínculo; **500** falha inesperada, sem SQL ou stack na resposta. Exclusão **204** não tem corpo. Não retornar HTML faz parte dos testes.
-
-## Exemplos completos
-
-O [Modo B](testes/requisicoes.md) contém corpos JSON, curl.exe, respostas e erros das
-22 rotas. Os exemplos obtêm IDs reais e criam usuário novo. Para compra de R$ 100
-em três parcelas, espere 33,34 / 33,33 / 33,33. Não é necessário copiar tokens nem IDs.
-
-## Regras de negócio e decisões documentadas
-
-- Cadastro normaliza e-mail com `trim().toLowerCase()` e CPF para dígitos. Senha tem pelo menos 8 caracteres, letras e números; máximo 72 bytes para evitar truncamento do bcrypt. Hash usa custo 10. Banco garante unicidade mesmo com requisições simultâneas. Cadastro cria usuário, 9 categorias e conta na mesma transação.
-- Dono vem exclusivamente de `req.auth.id`. `usuario_id` enviado pelo cliente é ignorado. Leituras, mudanças, exclusões, relatórios e referências de lançamentos respeitam o dono.
-- Categoria: `entrada`/`saida`, nome único por usuário e tipo. Fonte/destino: `renda`/`conta`/`cartao_credito`, nome único por usuário. Cartão exige dias inteiros 1–31 e limite positivo. Campos de cartão são gravados como NULL nos outros tipos.
-- Registros com lançamentos não podem ser excluídos nem mudar de tipo (409). Nome e dados do cartão podem ser alterados; mudar fechamento/vencimento recalcula a previsão, pois não há histórico de configuração no schema.
-- Dinheiro é número JSON positivo com até 2 casas, limitado ao DECIMAL(12,2). SQL guarda DECIMAL; cálculos de parcelas e faturas somam centavos inteiros. Valores enviados como strings são rejeitados.
-- Lançamento exige categoria do mesmo tipo e categoria/fonte do mesmo dono. Enviar `parcelas` exige saída em cartão, de 1 a 48 vezes, cada parcela com ao menos um centavo. Resto inteiro vai para a primeira. Mesmo `parcelas: 1` gera UUID; omitir o campo cria lançamento simples com grupo nulo.
-- **Na criação, todas as parcelas guardam a mesma data original da compra.** Listagem e relatórios usam a data armazenada; somente faturas deslocam os vencimentos. Não duplicar o deslocamento na data SQL.
-- Listagem usa mês UTC atual quando faltam datas, 20 itens por página, `data DESC, id DESC`. Resumo considera todos os registros dos mesmos filtros, antes do LIMIT. Lista vazia tem `totalPaginas: 0`.
-- PUT recebe todos os campos editáveis e altera somente o ID solicitado: descrição, valor, data, tipo, categoria e fonte/destino. Preserva UUID e numeração, sem propagar mudanças às demais parcelas; não aceita `parcelas`. Referências e tipo continuam validados. A parcela corrigida pode ter data/tipo diferentes e passa a ser contabilizada pelos seus campos atuais; só saídas em cartão entram nas faturas. Excluir/recriar o grupo corrige a compra inteira. [Justificativa da interpretação](docs/CONFORMIDADE.md).
-- RF7 usa SUM/GROUP BY no MySQL. Compara mês completo ao mês anterior, como no exemplo outubro/setembro; outros intervalos usam igual número de dias inclusivos. Inclui categorias que só tiveram movimento anterior. Com anterior zero e atual positivo, variação é `null` (indefinida); percentuais de distribuição são números.
-- RF8 devolve arrays `entradas`, `saidas` e `contas`, com saldo apenas do período. Não há saldo inicial ou conciliação bancária.
-- RF9 considera a fatura aberta que receberia uma compra hoje, mais as seguintes até completar `meses`. Compra **no fechamento** passa ao mês seguinte. A parcela k avança k−1 meses. Vencimento maior que fechamento fica no mesmo mês; caso contrário, mês seguinte. Dias inexistentes viram último dia do mês, conforme a função oficial.
-- Limite utilizado soma todas as saídas de cartão com vencimento **hoje ou posterior**, incluindo faturas já fechadas não vencidas e parcelas além da janela solicitada. Disponível pode ficar negativo: não há bloqueio de compra por limite no enunciado. Não há entidade de pagamento de fatura; vencimentos passados deixam de compor esse cálculo automaticamente.
-
-## Desafio: saúde financeira
-
-`GET /saude-financeira` exige o mesmo JWT e não recebe ID de usuário. Usa três
-meses **completos anteriores**; mês sem movimento vale zero e a média divide sempre
-por três. `mesesComMovimento` informa a cobertura. Não presume renda não registrada.
-
-| Indicador | Regra |
-|---|---|
-| `taxaPoupanca` | (entradas − saídas) / entradas do último mês completo, pela data dos lançamentos; `null` sem entradas |
-| `comprometimentoCartoes` | Faturas conhecidas do mês atual e dos dois seguintes / (3 × renda média mensal); `null` sem renda média |
-| `parcelasAVencer` | Reais das parcelas de compras com total_parcelas > 1 e vencimento hoje ou depois, inclusive além da projeção |
-
-Taxas são frações: `0.4` significa 40%. A projeção cobre o mês UTC atual e os dois
-seguintes. Repete a média de entradas e de saídas **fora de cartões**, e soma as faturas
-conhecidas de cada mês, usando a mesma função de RF9. Inclui todo o mês, mesmo seus
-vencimentos já passados. Isso evita contar a compra no cartão novamente na média.
-`saldoPrevisto` é o fluxo previsto daquele mês, não saldo bancário acumulado. Não
-estima compras futuras de cartão, inflação, pagamentos efetivos ou renda ausente.
-
-Dicas usam regras explícitas: falta de renda; taxa de poupança negativa; faturas acima
-de 30% da renda projetada (limiar didático adotado no projeto); saldo mensal negativo;
-e valor das parcelas ainda não vencidas. Sem alertas, informa que nenhuma dessas regras
-foi acionada. Não atribui uma nota à pessoa. Toda resposta contém o aviso obrigatório:
-“Informações educativas; não constituem recomendação financeira profissional.”
-
-```powershell
-$status = curl.exe @curlArgs "$baseApi/saude-financeira" -H "Authorization: Bearer $token"
-Ler-Resposta $status 200 | ConvertTo-Json -Depth 6
+```text
+database/     connection.js, schema.sql, seed.sql
+middleware/   auth.js
+models/       Usuario, Categoria, FonteDestino, Lancamento, Relatorio
+routes/       auth, categorias, fontesDestinos, lancamentos, relatorios, saudeFinanceira
+utils/        cpf, validacao, datas, parcelas, faturas, saudeFinanceira
+docs/         openapi.json, AMBIENTE-LOCAL.md, CONFORMIDADE.md
+testes/       *.test.js, requisicoes.md, comandos.ps1, executar-exemplos.ps1, preparar-demo.js
+iniciar.ps1
+server.js
 ```
 
-## Testes, apresentação e estudo
+## Regras e limites
+
+- Cadastro normaliza e-mail/CPF e cria nove categorias e uma conta na mesma transação. Senha: mínimo 8 caracteres com letras/números, máximo 72 bytes. UNIQUE garante e-mail/CPF exclusivos. Senhas não são retornadas.
+- Recursos e referências são privados por usuário. Duplicidades e exclusões de cadastros vinculados retornam 409; IDs alheios retornam 404. Tipos de cadastros vinculados não podem mudar.
+- Dinheiro: número JSON positivo com até duas casas, limitado a DECIMAL(12,2). Parcelamento explícito aceita 1–48, somente em saída de cartão, com UUID inclusive para 1. Campo omitido gera grupo nulo. Resto dos centavos vai à primeira parcela.
+- Parcelas são criadas com a mesma data. PUT exige todos os campos editáveis e altera apenas o ID indicado; preserva UUID/numeração e não aceita parcelas. Data, tipo e referências podem mudar individualmente. Relatórios/faturas refletem os dados atuais.
+- Listagem: 20 itens por página, mês UTC atual por padrão e resumo antes da paginação. Relatórios exigem inicio/fim. Meses completos comparam com o mês anterior; outros intervalos usam a mesma duração inclusiva. Variação com anterior zero e atual positivo retorna null.
+- Faturas: compra no fechamento entra no ciclo seguinte; dias inexistentes viram o último dia do mês. Limite utilizado inclui vencimentos de hoje em diante, inclusive fora da janela. Não há pagamento de faturas, saldo inicial, transferências ou recuperação de senha.
+- Erros JSON usam erro e, quando aplicável, campos. Status: 400 validação, 401 autenticação, 404 ausente/alheio, 409 conflito, 500 falha interna. Exclusão retorna 204 sem corpo.
+
+### Saúde financeira
+
+GET /saude-financeira usa três meses completos de histórico; meses vazios contam como zero.
+
+- taxaPoupanca: (entradas − saídas) / entradas do último mês completo.
+- comprometimentoCartoes: faturas dos três meses projetados / (renda média mensal × 3).
+- parcelasAVencer: parcelas de compras múltiplas com vencimento hoje ou posterior, inclusive fora da projeção.
+
+Sem renda, razões retornam null. Projeta o mês corrente e os dois seguintes: média das entradas e saídas fora do cartão, somada às faturas conhecidas de cada mês, sem dupla contagem. saldoPrevisto é mensal, não acumulado; não estima compras futuras, inflação ou pagamentos efetivos.
+
+Dicas: ausência de renda, poupança negativa, comprometimento acima de 30%, saldo mensal negativo ou parcelas pendentes. Sem alertas, informa que nenhuma regra foi acionada. Toda resposta contém: “Informações educativas; não constituem recomendação financeira profissional.”
+
+## Testes
 
 ```powershell
-npm test
-npm run test:http
-# Em outro terminal, depois de npm start com MySQL e .env corretos:
+npm.cmd test
+npm.cmd run test:http
+node --test testes/swagger.test.js
+```
+
+Com a API iniciada por iniciar.ps1, execute em outro terminal:
+
+```powershell
 $env:EXECUTAR_INTEGRACAO='1'
-npm run test:integracao
+npm.cmd run test:integracao
+node --test testes/swagger-integracao.test.js
 Remove-Item Env:EXECUTAR_INTEGRACAO
-# Opcional administrativo: MySQL iniciado, .env e .local/admin.json configurados
+.\testes\executar-exemplos.ps1
 $env:EXECUTAR_BANCO='1'
 node --test testes/banco.test.js
 Remove-Item Env:EXECUTAR_BANCO
 ```
 
-`npm test` não precisa de dependências nem de MySQL. `test:http` exige `npm install`, usa porta efêmera e verifica Express/JWT/bcrypt reais sem consultas ao banco. `test:integracao` usa API real em `http://127.0.0.1:3000` (ou `TEST_API_URL`) e cria dois usuários fictícios por execução. Os dados ficam no banco de demonstração; a suíte não apaga dados anteriores. O teste é explicitamente ignorado sem a variável de habilitação.
+Integração e catálogo criam dados fictícios na API selecionada; use banco isolado. A suíte de banco cria seu próprio banco novo usando admin.json. Sem variáveis de ativação, essas suítes são ignoradas. Resultados e limitações: [CONFORMIDADE](docs/CONFORMIDADE.md).
 
-`banco.test.js` cria um banco isolado com schema/seed e testa UNIQUE, CHECK, FK e
-falhas por triggers no cadastro e na segunda parcela. Remove as triggers e fecha
-as conexões; mantém o banco fictício para inspeção, sem alterar o banco da API.
-Requer administrador capaz de criar banco/triggers e conceder privilégios; formato
-do arquivo privado em [AMBIENTE-LOCAL](docs/AMBIENTE-LOCAL.md). Sem habilitação, é ignorado.
+## Solução de problemas
 
-Em ambiente com restrição de subprocessos, substitua o executor por `node testes/unidades.test.js` e `node testes/transacoes.test.js`. O mesmo vale para os outros dois arquivos, respeitando seus pré-requisitos.
+| Problema | Ação |
+|---|---|
+| Porta 3000 ocupada | Encerre a API anterior no terminal dela |
+| MySQL indisponível | Inicie o servidor e confira DB_HOST/DB_PORT e admin.json |
+| Acesso negado ou banco inexistente | Confira senhas, banco inicial e privilégios localmente |
+| Script bloqueado | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1; vale só nesse processo |
+| npm.ps1 bloqueado | Use npm.cmd |
+| 401 no Swagger | Faça login e autorize novamente |
+| 404 | Consulte IDs do usuário autenticado |
+| 409 | Use e-mail/CPF/nome disponíveis ou remova vínculos antes de excluir |
+| Banco incorreto | Encerre API, remova DB_NAME da sessão e repita o iniciador |
 
-Para demonstrar, execute `.\iniciar-apresentacao.ps1` e abra
-[APRESENTACAO](docs/APRESENTACAO.md). Em outro terminal,
-`.\testes\executar-exemplos.ps1` conduz o Modo A; `-Modo B` percorre todas as rotas.
-O planejamento é de nove minutos, com um minuto de margem; precisa de ensaio oral.
-O roteiro distingue início automático de demonstração explícita de npm/nodemon.
-
-Eduardo é o único autor e apresentador do trabalho e deve saber explicar qualquer trecho do código. Para estudar, leia [EXPLICACAO-CODIGO](docs/EXPLICACAO-CODIGO.md) e [PERGUNTAS-BANCA](docs/PERGUNTAS-BANCA.md). A publicação no Git remoto e o envio do link da entrega não foram executados nesta revisão.
-
-## Limitações conhecidas
-
-Faltam o ensaio individual cronometrado, a reprodução independente do README e o envio do link de entrega. O desafio foi implementado e testado; a atribuição dos pontos cabe à professora. Pagamentos de fatura, transferências, recuperação de senha e revogação de token estão fora do escopo.
+Logs do iniciador: .local/api-out.log e .local/api-erro.log.
