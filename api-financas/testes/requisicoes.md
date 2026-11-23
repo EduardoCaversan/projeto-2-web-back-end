@@ -10,6 +10,36 @@ Os comandos usam **curl.exe**. `Salvar-Json` grava UTF-8 para evitar escapes do 
 IDs, UUIDs e datas das respostas ilustrativas variam; os comandos obtêm valores reais.
 Arrays abreviados estão identificados. Não copie IDs dos exemplos.
 
+## Consulta por operação
+
+Execute o catálogo em ordem na primeira vez: as variáveis vêm das respostas anteriores.
+Durante perguntas, use os links para localizar uma ficha sem percorrer o documento inteiro.
+
+| Nº | Operação |
+|---|---|
+| 1 | [Cadastrar usuário](#1-cadastrar-usuário) |
+| 2 | [Fazer login](#2-fazer-login) |
+| 3 | [Consultar usuário autenticado](#3-consultar-usuário-autenticado) |
+| 4 | [Listar categorias](#4-listar-categorias) |
+| 5 | [Criar categoria](#5-criar-categoria) |
+| 6 | [Consultar categoria](#6-consultar-categoria) |
+| 7 | [Atualizar categoria](#7-atualizar-categoria) |
+| 8 | [Excluir categoria](#8-excluir-categoria) |
+| 9 | [Listar fontes e destinos](#9-listar-fontes-e-destinos) |
+| 10 | [Criar cartão](#10-criar-cartão) |
+| 11 | [Consultar fonte/destino](#11-consultar-fontedestino) |
+| 12 | [Atualizar fonte/destino](#12-atualizar-fontedestino) |
+| 13 | [Criar lançamento parcelado](#13-criar-lançamento-parcelado) |
+| 14 | [Listar lançamentos](#14-listar-lançamentos) |
+| 15 | [Consultar lançamento](#15-consultar-lançamento) |
+| 16 | [Atualizar lançamento individual](#16-atualizar-lançamento-individual) |
+| 17 | [Relatório por categoria](#17-relatório-por-categoria) |
+| 18 | [Relatório por fonte/destino](#18-relatório-por-fontedestino) |
+| 19 | [Prever faturas](#19-prever-faturas) |
+| 20 | [Consultar saúde financeira](#20-consultar-saúde-financeira) |
+| 21 | [Excluir lançamento ou grupo](#21-excluir-lançamento-ou-grupo) |
+| 22 | [Excluir fonte/destino](#22-excluir-fontedestino) |
+
 ## Preparação do terminal
 
 <!-- executar -->
@@ -28,7 +58,7 @@ $fim = ([datetime]::ParseExact($inicio,'yyyy-MM-dd',$null)).AddMonths(1).AddDays
 
 **Headers/autenticação:** Não exige Bearer Token. Content-Type: application/json.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:**
 
@@ -61,8 +91,6 @@ $usuario | ConvertTo-Json
 }
 ```
 
-
-
 **Erros comuns:** 400: campos inválidos; 409: e-mail ou CPF duplicado.
 
 **O que falar:** Normalizamos e-mail e CPF. UNIQUE garante unicidade e bcrypt protege a senha.
@@ -79,7 +107,7 @@ $usuario | ConvertTo-Json
 
 **Headers/autenticação:** Não exige Bearer Token. Content-Type: application/json.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:**
 
@@ -113,8 +141,6 @@ $login.usuario | ConvertTo-Json
 }
 ```
 
-
-
 **Erros comuns:** 401: credenciais incorretas.
 
 **O que falar:** O token fica em uma variável. Enviamos Bearer nas próximas chamadas.
@@ -131,7 +157,7 @@ $login.usuario | ConvertTo-Json
 
 **Headers/autenticação:** Authorization: Bearer $token.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:** Sem corpo.
 
@@ -155,8 +181,6 @@ $me | ConvertTo-Json
   "criado_em": "2026-11-15 18:00:00"
 }
 ```
-
-
 
 **Erros comuns:** 401: token ausente/inválido/expirado; 404: usuário removido. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -219,7 +243,7 @@ Array abreviado; cadastro novo tem nove categorias.
 
 **Headers/autenticação:** Authorization: Bearer $token. Content-Type: application/json.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:**
 
@@ -249,8 +273,6 @@ $cat | ConvertTo-Json
   "tipo": "saida"
 }
 ```
-
-
 
 **Erros comuns:** 400: nome/tipo inválidos; 409: nome e tipo já cadastrados. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -290,8 +312,6 @@ $catConsultada | ConvertTo-Json
   "tipo": "saida"
 }
 ```
-
-
 
 **Erros comuns:** 400: ID inválido; 404: ausente ou alheia. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -339,8 +359,6 @@ $catAtualizada | ConvertTo-Json
 }
 ```
 
-
-
 **Erros comuns:** 400: campos inválidos; 404: ausente/alheia; 409: duplicidade ou mudança de tipo com vínculo. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** Renomear é permitido. Mudar o tipo com lançamentos vinculados é bloqueado.
@@ -370,8 +388,6 @@ Ler-Resposta $status 204
 ```
 
 **HTTP 204. Resposta esperada:** corpo vazio.
-
-
 
 **Erros comuns:** 400: ID inválido; 404: ausente/alheia; 409: categoria vinculada. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -418,8 +434,6 @@ $fontes | Format-Table
 ]
 ```
 
-
-
 **Erros comuns:** 400: tipo inválido. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** Conta não precisa dos dados de cartão; eles aparecem como null.
@@ -436,7 +450,7 @@ $fontes | Format-Table
 
 **Headers/autenticação:** Authorization: Bearer $token. Content-Type: application/json.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:**
 
@@ -473,8 +487,6 @@ $cartao | ConvertTo-Json
   "limite": 1000
 }
 ```
-
-
 
 **Erros comuns:** 400: tipo/dias/limite inválidos ou ausentes; 409: nome repetido. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -517,8 +529,6 @@ $cartaoConsultado | ConvertTo-Json
   "limite": 1000
 }
 ```
-
-
 
 **Erros comuns:** 400: ID inválido; 404: ausente/alheio. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -574,8 +584,6 @@ $cartaoAtualizado | ConvertTo-Json
 }
 ```
 
-
-
 **Erros comuns:** 400: campos inválidos; 404: ausente/alheio; 409: duplicidade ou mudança de tipo com vínculo. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** Mudar fechamento ou vencimento recalcula as previsões com as regras atuais.
@@ -592,7 +600,7 @@ $cartaoAtualizado | ConvertTo-Json
 
 **Headers/autenticação:** Authorization: Bearer $token. Content-Type: application/json.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:**
 
@@ -649,8 +657,6 @@ $compra | ConvertTo-Json -Depth 6
   ]
 }
 ```
-
-
 
 **Erros comuns:** 400: dados inválidos, categoria incompatível ou parcelamento fora de 1–48; 404: referência ausente/alheia. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -775,8 +781,6 @@ $item | ConvertTo-Json -Depth 4
 }
 ```
 
-
-
 **Erros comuns:** 400: ID inválido; 404: ausente/alheio. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** Cada parcela é um recurso com ID próprio.
@@ -842,8 +846,6 @@ $itemAtualizado | ConvertTo-Json -Depth 4
 }
 ```
 
-
-
 **Erros comuns:** 400: dados inválidos/categoria incompatível/parcelas no PUT; 404: registro ou referência ausente/alheia. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** Data, tipo e referências podem mudar individualmente. UUID e numeração ficam preservados.
@@ -905,8 +907,6 @@ $porCategoria | ConvertTo-Json -Depth 6
 }
 ```
 
-
-
 **Erros comuns:** 400: período ausente/inválido. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** SUM e GROUP BY fazem a agregação no MySQL. Variação com anterior zero é null.
@@ -964,8 +964,6 @@ $porFonte | ConvertTo-Json -Depth 6
   ]
 }
 ```
-
-
 
 **Erros comuns:** 400: período ausente/inválido. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
@@ -1048,7 +1046,7 @@ Faturas abreviadas: haverá mais duas, com 33.33 cada. Datas dependem de hoje; e
 
 **Headers/autenticação:** Authorization: Bearer $token.
 
-**Parâmetros:** Identificadores e filtros no comando abaixo; não recebe usuario_id.
+**Parâmetros:** Sem parâmetros de caminho ou query.
 
 **Corpo JSON:** Sem corpo.
 
@@ -1126,8 +1124,6 @@ Ler-Resposta $status 204
 
 **HTTP 204. Resposta esperada:** corpo vazio.
 
-
-
 **Erros comuns:** 400: ID/query inválidos; 404: ausente/alheio. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 
 **O que falar:** A exclusão coletiva busca o UUID e filtra novamente pelo dono.
@@ -1157,8 +1153,6 @@ Ler-Resposta $status 204
 ```
 
 **HTTP 204. Resposta esperada:** corpo vazio.
-
-
 
 **Erros comuns:** 400: ID inválido; 404: ausente/alheio; 409: vínculo existente. 401 para token ausente/inválido; 404 para ID ausente/alheio quando aplicável.
 

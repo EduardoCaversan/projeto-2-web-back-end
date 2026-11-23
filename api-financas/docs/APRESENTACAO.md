@@ -15,6 +15,10 @@ API em **http://127.0.0.1:3000** e confirma login/leitura. Deixe esse terminal a
 **Ctrl+C** encerra apenas a API iniciada por ele. Os bancos ficam preservados.
 O MySQL precisa estar iniciado; o script não instala nem inicia o servidor de banco.
 
+**Escolha antes de começar:** para ensaiar as requisições, use o comando acima.
+Para a avaliação, deixe apenas o MySQL ligado e execute a sequência da etapa 2 ao
+vivo: ela já cria o banco e inicia nodemon. Assim não é preciso iniciar a API duas vezes.
+
 Em outro PowerShell, na mesma pasta, execute os blocos deste documento na ordem, ou:
 
 ```powershell
@@ -58,23 +62,24 @@ O cadastro confirma usuário, categorias e conta juntos; qualquer falha faz roll
 
 ## 2. Banco e inicialização — 1 minuto
 
-**Mostrar:** saída do iniciador, `testes/preparar-demo.js`, schema e seed.
+**Mostrar:** `testes/preparar-demo.js`, schema e seed; executar no terminal 1.
 **Esperado:** banco novo e API confirmada, sem senhas na tela.
 **Falar:** “O auxiliar importa os dois SQL usando mysql2. A variável DB_NAME seleciona
 somente o banco do ensaio; não sobrescrevemos o .env.”
 
-A professora também pede demonstrar **npm install e npm run dev**. Para essa parte
-da avaliação, encerre o iniciador com Ctrl+C e execute no terminal 1:
+A professora pede criar o banco e demonstrar **npm install e npm run dev**.
+Com MySQL ligado e porta 3000 livre, execute este bloco:
 
 ```powershell
 npm.cmd install --offline --no-audit --no-fund
+node testes/preparar-demo.js
 $env:DB_NAME = (Get-Content .local/demo-banco.txt -Raw).Trim()
 npm.cmd run dev
 ```
 
-Isso reutiliza o banco recém-preparado e mostra nodemon. O cache precisa ter sido
-preparado antes; se usar somente o iniciador, ele roda `node server.js` e **não**
-demonstra nodemon. Após essa alternativa, Ctrl+C e `Remove-Item Env:DB_NAME`.
+Isso importa schema/seed em banco novo e mostra nodemon. O cache precisa ter sido
+preparado antes. O iniciador de ensaio usa `node server.js`; esta sequência cobre
+também a demonstração de nodemon. Ao encerrar, Ctrl+C e `Remove-Item Env:DB_NAME`.
 **Conceitos:** CLI, npm, devDependencies e dotenv. Não reimporte o seed no mesmo banco.
 
 ## 3. Cadastro e duplicidades — 1 minuto
