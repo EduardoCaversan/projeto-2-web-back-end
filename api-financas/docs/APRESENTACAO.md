@@ -31,24 +31,24 @@ blocos manualmente e o auxiliar ao mesmo tempo. `-SemPausas` serve para teste t�
 O **Modo B**, com ficha de cada uma das 22 rotas (JSON, curl.exe, resposta, implementação
  e pergunta), está em [testes/requisicoes.md](../testes/requisicoes.md).
 
-**Integrante A:** Eduardo Caversan da Silva Rocha — RA 2475391.
-**Integrante B:** [preencher nome e RA].
+**Autor e apresentador:** Eduardo Caversan da Silva Rocha — RA 2475391.
+**Modalidade:** trabalho individual.
 
 ## Tempos e preparação
 
-| Etapa oficial | Tempo | Pessoa |
-|---|---|---|
-| 1. Estrutura, schema, modelo, rota e middleware | 00:00–01:00 | A |
-| 2. Banco, instalação e execução pela linha de comando | 01:00–02:00 | B |
-| 3. Cadastro e duplicidades | 02:00–03:00 | A |
-| 4. Login e isolamento | 03:00–04:00 | B |
-| 5. CRUD, validações e parcelamento | 04:00–06:00 | A (1 min) / B (1 min) |
-| 6. Relatórios e faturas | 06:00–08:00 | A (1 min) / B (1 min) |
-| 7. Saúde financeira e encerramento | 08:00–09:00 | A (30 s) / B (30 s) |
+| Etapa oficial | Tempo |
+|---|---|
+| 1. Estrutura, schema, modelo, rota e middleware | 00:00–01:00 |
+| 2. Banco, instalação e execução pela linha de comando | 01:00–02:00 |
+| 3. Cadastro e duplicidades | 02:00–03:00 |
+| 4. Login e isolamento | 03:00–04:00 |
+| 5. CRUD, validações e parcelamento | 04:00–06:00 |
+| 6. Relatórios e faturas | 06:00–08:00 |
+| 7. Saúde financeira e encerramento | 08:00–09:00 |
 
-Cada integrante fala 4min30. O minuto restante inclui pequenos atrasos. Abrir os
+Eduardo apresenta todas as etapas. O minuto restante inclui pequenos atrasos. Abrir os
 arquivos abaixo antes do cronômetro; dependências devem estar no cache. Os tempos
-são **planejados**: execução automática não comprova ensaio oral nem domínio dos alunos.
+são **planejados**: execução automática não comprova ensaio oral nem domínio do aluno.
 
 ## 1. Estrutura — 1 minuto
 

@@ -78,7 +78,7 @@
 
 39. **O desafio de saúde financeira foi feito?** Sim. Calcula taxa de poupança, comprometimento com cartões e parcelas a vencer; projeta três meses e gera dicas por regras. Usa os próprios dados e sempre retorna aviso educativo.
 
-40. **Como demonstramos autoria e compreensão?** Ambos estudam e explicam todos os trechos, executam testes e fazem contribuições reais em seus próprios commits. Não atribuir commits ou execução a quem não realizou o trabalho.
+40. **Como demonstrar autoria e compreensão no trabalho individual?** Eduardo deve explicar todos os trechos, executar os testes e justificar as decisões registradas em seus commits. O apoio de IA não substitui o domínio do código.
 
 41. **PUT altera a compra inteira?** Não. Corrige apenas o ID indicado, inclusive data, tipo e referências. Preserva UUID e numeração; não aceita reparcelar. As demais parcelas ficam intactas. Categoria e fonte precisam pertencer ao dono e a categoria deve combinar com o tipo.
 

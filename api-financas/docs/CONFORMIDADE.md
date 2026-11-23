@@ -1,13 +1,13 @@
 # Conformidade final — 23/11/2026
 
-Eduardo Caversan da Silva Rocha — RA 2475391. Segundo integrante: **[nome e RA pendentes]**.
+Eduardo Caversan da Silva Rocha — RA 2475391. **Trabalho individual.**
 Fonte de verdade: [enunciado, seções 11.1–11.12](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html).
 Leitura integral conferida contra o fonte oficial `12-projeto-api-controle-financeiro.Rmd`.
 O relatório independente fornecido pelo usuário foi confrontado com o código atual.
 O checklist inicial permanece no commit `1dc709c`; as decisões e evidências estão consolidadas abaixo.
 
 **T** = testado automaticamente nesta revisão; **I** = inspecionado;
-**M** = validado manualmente por integrante (nenhuma nova evidência apresentada);
+**M** = validado manualmente pelo aluno (nenhuma nova evidência apresentada);
 **NV** = não verificado, depende de execução humana. Conexão simulada não comprova MySQL.
 “Concluído” descreve o requisito nos cenários exercitados, sem atribuir nota definitiva.
 “Parcial” indica parte técnica pronta com validação restante; “pendente” indica falta de evidência.
@@ -46,8 +46,8 @@ O checklist inicial permanece no commit `1dc709c`; as decisões e evidências es
 | 13. HTTP/erros | 4 | T: 200/201/204/400/401/404/409, JSON; I: 500 genérico sem detalhes internos | concluído |
 | 14. SQL/restrições | 4 | I: placeholders e fragmentos fixos; T: oito rejeições UNIQUE/CHECK/FK | concluído |
 | 15. Arquivos/docs/testes | 3 | I: artefatos exigidos; T: instalação, 22 rotas cobertas, blocos PowerShell executados | concluído |
-| 16. Explicação pelos integrantes | 5 | NV: guias não comprovam domínio oral dos alunos | pendente |
-| 17. Execução pelos integrantes | 5 | T: ferramentas e comandos funcionaram; NV: execução dos alunos não presenciada | pendente |
+| 16. Explicação do código-fonte | 5 | NV: guias não comprovam domínio oral do aluno | pendente |
+| 17. Execução pela linha de comando | 5 | T: ferramentas e comandos funcionaram; NV: execução do aluno não presenciada | pendente |
 | 18. Sete tópicos em até 10min | 5 | I: roteiro de 9 minutos + 1 minuto de margem; NV: ensaio oral cronometrado não realizado | pendente |
 | Desafio | +10 | T: três indicadores, três meses, regras e aviso; atribuição dos pontos pela professora | concluído |
 
@@ -86,14 +86,13 @@ O checklist inicial permanece no commit `1dc709c`; as decisões e evidências es
 - [x] T: relatórios retornam números.
 - [x] I: .env, .local e node_modules ignorados; .env.example e lockfile versionados.
 - [ ] NV: outra pessoa reproduziu a instalação usando apenas README.
-- [ ] NV: nome/RA e contribuição real do outro integrante, com seus próprios commits.
-- [ ] NV: ensaio oral dos dois integrantes, cronometrado.
+- [ ] NV: ensaio oral individual cronometrado e domínio do código por Eduardo.
 - [ ] NV: confirmar publicação atual e enviar link. Origin já configurado; nenhum push nesta revisão.
 
-Não há comprovação manual nova dos alunos. Não se afirma nota 100/100, autoria do
-segundo integrante, publicação ou conclusão da apresentação. Se a composição da equipe
-divergir da dupla citada na entrega, confirmar com a professora: o cabeçalho admite
-até três pessoas, mas política e apresentação mencionam dois. Execuções reais detalhadas abaixo.
+Eduardo informou que realizará o trabalho sozinho. A documentação e o roteiro
+consideram somente sua autoria e apresentação. Não há comprovação manual nova do
+aluno; não se afirma nota 100/100, publicação ou conclusão da apresentação.
+Execuções reais detalhadas abaixo.
 ## Inventário documental e revisão de 15/11/2026
 
 Inspeção inicial: Git limpo em b77fffd, master e identidade preservados. Enunciado
@@ -129,7 +128,7 @@ instalação, estudo, apresentação, catálogo HTTP e evidências. Histórico i
 | Correção documental | Datas após PUT, funções reais, catálogo HTTP e comandos Windows |
 | Simplificação segura | Unificação de roteiro/consulta rápida e das evidências de auditoria |
 | Melhoria solicitada | Iniciador de 68 linhas reutilizando preparar-demo.js; executor dos próprios blocos Markdown |
-| Intervenção humana | Identificação, contribuição, ensaio oral, reprodução independente e entrega |
+| Intervenção humana | Domínio do código, ensaio individual, reprodução independente e entrega |
 
 Locks, transações, rollback, SQL parametrizado, validações, verificação de dono e
 comentários financeiros têm finalidade concreta e foram mantidos. Nenhum helper
@@ -202,14 +201,13 @@ resposta de um servidor alheio. Nenhum processo de terceiros foi encerrado.
 
 A revisão de 09/11 registrou baseline 26/6/11 e final 29/6/14/5, instalação, auditoria
 npm então sem vulnerabilidades e ensaio técnico HTTP em 3001. Documentos completos
-recuperáveis em b77fffd. Não atribuímos esses testes aos integrantes nem os contamos
+recuperáveis em b77fffd. Não atribuímos esses testes ao aluno nem os contamos
 como execução nova. Não houve nova auditoria de vulnerabilidades nesta rodada.
 As 15.876 combinações da auditoria independente não foram reexecutadas em suíte
 separada; os testes de calendário versionados foram reexecutados.
 
-Comandos HTTP automáticos levam segundos; isso **não mede fala, navegação ou troca
-de apresentador**. O roteiro planeja nove minutos, mas critérios 16–18 continuam
-pendentes de apresentação/ensaio pelos integrantes. Nenhum commit foi atribuído ao
-segundo integrante. Identidade Git preservada; origin encontrado:
+Comandos HTTP automáticos levam segundos; isso **não mede fala nem navegação**.
+O roteiro planeja nove minutos, mas critérios 16–18 continuam pendentes de
+apresentação/ensaio individual por Eduardo. Identidade Git preservada; origin encontrado:
 https://github.com/EduardoCaversan/projeto-2-web-back-end.git. Nenhum push ou envio de
 link nesta revisão. Pontuação e aceitação final cabem à professora.

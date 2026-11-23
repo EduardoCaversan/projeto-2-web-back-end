@@ -144,7 +144,7 @@ Express 5 encaminha rejeições async automaticamente, mas transações ainda pr
 
 ## 12. O que estudar e validar de verdade
 
-Ambos os integrantes devem executar cada rota, explicar os arrays de parâmetros SQL, seguir uma transação até o rollback e calcular uma fatura manualmente. O enunciado permite apoio de IA, mas exige compreensão e autoria efetiva. A validação MySQL foi realizada e registrada em CONFORMIDADE.md; esta documentação não substitui o ensaio. Consulte a auditoria antes de declarar qualquer requisito concluído.
+Eduardo deve executar cada rota, explicar os arrays de parâmetros SQL, seguir uma transação até o rollback e calcular uma fatura manualmente. O apoio de IA não substitui a compreensão e a autoria efetiva do trabalho individual. A validação MySQL foi realizada e registrada em CONFORMIDADE.md; esta documentação não substitui o ensaio. Consulte a auditoria antes de declarar qualquer requisito concluído.
 
 ## 13. Saúde financeira
 

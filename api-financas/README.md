@@ -2,8 +2,8 @@
 
 Projeto acadêmico de **Programação Web Back-end**, implementado conforme [o enunciado da professora Juliana Costa Silva](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html), seções 11.1 a 11.12.
 
-**Aluno:** Eduardo Caversan da Silva Rocha — **RA:** 2475391.  
-**Segundo integrante:** [preencher nome e RA].
+**Aluno:** Eduardo Caversan da Silva Rocha — **RA:** 2475391.
+**Modalidade:** trabalho individual.
 
 A API cadastra usuários, autentica com JWT, mantém categorias, fontes/destinos e lançamentos privados, divide compras em parcelas e retorna relatórios e faturas em JSON. O objetivo é aplicar Express, classes de modelo, MySQL, transações e autenticação estudados na disciplina. Não há interface gráfica.
 
@@ -155,7 +155,7 @@ O servidor escuta em `http://127.0.0.1:3000`. Encerre com Ctrl+C. `/` devolve 40
 
 ## Autenticação e primeira requisição
 
-Credenciais fictícias: `ana@example.com` e `bruno@example.com`; senha de ambos: **`p@5sw0rd`**. Os CPFs de teste são `52998224725` e `11144477735`. Nenhum corresponde a dados fornecidos pelos integrantes. O seed usa um vetor de teste bcrypt publicado pela própria biblioteca; a origem está comentada no SQL e a correspondência é testada em `http.test.js`.
+Credenciais fictícias: `ana@example.com` e `bruno@example.com`; senha de ambos: **`p@5sw0rd`**. Os CPFs de teste são `52998224725` e `11144477735`. Nenhum corresponde a dados fornecidos pelo aluno. O seed usa um vetor de teste bcrypt publicado pela própria biblioteca; a origem está comentada no SQL e a correspondência é testada em `http.test.js`.
 
 Em outro terminal, na mesma pasta:
 
@@ -243,7 +243,7 @@ vencimentos já passados. Isso evita contar a compra no cartão novamente na mé
 estima compras futuras de cartão, inflação, pagamentos efetivos ou renda ausente.
 
 Dicas usam regras explícitas: falta de renda; taxa de poupança negativa; faturas acima
-de 30% da renda projetada (limiar didático escolhido pelo grupo); saldo mensal negativo;
+de 30% da renda projetada (limiar didático adotado no projeto); saldo mensal negativo;
 e valor das parcelas ainda não vencidas. Sem alertas, informa que nenhuma dessas regras
 foi acionada. Não atribui uma nota à pessoa. Toda resposta contém o aviso obrigatório:
 “Informações educativas; não constituem recomendação financeira profissional.”
@@ -253,7 +253,7 @@ $status = curl.exe @curlArgs "$baseApi/saude-financeira" -H "Authorization: Bear
 Ler-Resposta $status 200 | ConvertTo-Json -Depth 6
 ```
 
-## Testes, apresentação e participação dos integrantes
+## Testes, apresentação e estudo
 
 ```powershell
 npm test
@@ -284,8 +284,8 @@ Para demonstrar, execute `.\iniciar-apresentacao.ps1` e abra
 O planejamento é de nove minutos, com um minuto de margem; precisa de ensaio oral.
 O roteiro distingue início automático de demonstração explícita de npm/nodemon.
 
-Ambos precisam explicar qualquer trecho conforme a política acadêmica. Leia [EXPLICACAO-CODIGO](docs/EXPLICACAO-CODIGO.md) e [PERGUNTAS-BANCA](docs/PERGUNTAS-BANCA.md). O segundo integrante deve realizar trabalho real: instalar/validar MySQL, executar integração, corrigir resultados, revisar documentação e fazer seus próprios commits. Não foram criados commits em seu nome. A publicação no Git remoto e o envio do link da entrega não foram executados.
+Eduardo é o único autor e apresentador do trabalho e deve saber explicar qualquer trecho do código. Para estudar, leia [EXPLICACAO-CODIGO](docs/EXPLICACAO-CODIGO.md) e [PERGUNTAS-BANCA](docs/PERGUNTAS-BANCA.md). A publicação no Git remoto e o envio do link da entrega não foram executados nesta revisão.
 
 ## Limitações conhecidas
 
-Faltam o ensaio e a contribuição efetiva do segundo integrante, a reprodução independente do README e o envio do link de entrega. O desafio foi implementado e testado; a atribuição dos pontos cabe à professora. Pagamentos de fatura, transferências, recuperação de senha e revogação de token estão fora do escopo.
+Faltam o ensaio individual cronometrado, a reprodução independente do README e o envio do link de entrega. O desafio foi implementado e testado; a atribuição dos pontos cabe à professora. Pagamentos de fatura, transferências, recuperação de senha e revogação de token estão fora do escopo.
