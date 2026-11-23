@@ -32,6 +32,17 @@ test('Restrições, seed e rollback real em banco novo', {
         WHERE usuario_id = ? AND data BETWEEN ? AND ? GROUP BY tipo`, [1, '2026-10-01', '2026-10-31']);
       assert.equal(Number(totais.find((r) => r.tipo === 'entrada').total), 5200);
       assert.equal(Number(totais.find((r) => r.tipo === 'saida').total), 5500);
+      const Relatorio = require('../models/Relatorio');
+      const categorias = await Relatorio.categorias(1, '2026-10-01', '2026-10-31');
+      const alimentacao = categorias.saidas.categorias.find(c => c.nome === 'Alimentação');
+      assert.equal(alimentacao.total, 1000);
+      assert.equal(alimentacao.anterior, 800);
+      assert.equal(alimentacao.variacao, 25);
+      assert.equal(categorias.saidas.categorias.find(c => c.nome === 'Educação').variacao, null);
+      const valores = categorias.saidas.categorias.map(c => c.total);
+      assert.deepEqual(valores, [...valores].sort((a, b) => b - a));
+      const fontes = await Relatorio.fontesDestinos(1, '2026-10-01', '2026-10-31');
+      assert.equal(fontes.contas.find(c => c.nome === 'Conta corrente').saldo, 2700);
     });
     await t.test('UNIQUE, CHECK e FK rejeitam SQL inválido diretamente', async () => {
       const rejeitar = (sql, parametros, codigo) => assert.rejects(conexao.execute(sql, parametros), { code: codigo });
