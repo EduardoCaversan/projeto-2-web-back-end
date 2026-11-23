@@ -1,9 +1,16 @@
 require('dotenv').config();
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const especificacao = require('./docs/openapi.json');
 const protegerRota = require('./middleware/auth');
 
 const app = express();
 app.use(express.json());
+app.get('/api-docs/openapi.json', (req, res) => res.json(especificacao));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(especificacao, {
+  swaggerOptions: { validatorUrl: null, persistAuthorization: false },
+  customSiteTitle: 'API Finanças',
+}));
 app.use('/auth', require('./routes/auth'));
 app.use('/categorias', protegerRota, require('./routes/categorias'));
 app.use('/fontes-destinos', protegerRota, require('./routes/fontesDestinos'));

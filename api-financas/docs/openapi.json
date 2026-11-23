@@ -1,0 +1,2435 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Finanças",
+    "version": "1.0.0",
+    "description": "API acadêmica de controle financeiro pessoal. Exemplos ilustrativos; IDs e resultados variam conforme o usuário e a data. Em Authorize, informe somente o token obtido no login."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autenticação"
+    },
+    {
+      "name": "Categorias"
+    },
+    {
+      "name": "Fontes e destinos"
+    },
+    {
+      "name": "Lançamentos"
+    },
+    {
+      "name": "Relatórios"
+    },
+    {
+      "name": "Faturas"
+    },
+    {
+      "name": "Saúde financeira"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/cadastro": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Cadastrar usuário",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cadastro"
+              },
+              "examples": {
+                "cadastro": {
+                  "value": {
+                    "nome": "Cliente",
+                    "email": "cliente@example.com",
+                    "cpf": "12345678909",
+                    "senha": "Teste1234"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                },
+                "example": {
+                  "id": 3,
+                  "nome": "Cliente",
+                  "email": "cliente@example.com"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Obter token JWT (1 hora)",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              },
+              "examples": {
+                "seed": {
+                  "value": {
+                    "email": "ana@example.com",
+                    "senha": "p@5sw0rd"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Autenticacao"
+                },
+                "example": {
+                  "token": "TOKEN_RECEBIDO_NO_LOGIN",
+                  "usuario": {
+                    "id": 1,
+                    "nome": "Ana Demonstração",
+                    "email": "ana@example.com"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Consultar usuário autenticado",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioAtual"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Ana Demonstração",
+                  "email": "ana@example.com",
+                  "cpf": "52998224725",
+                  "criado_em": "2026-11-03 12:00:00"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/categorias": {
+      "get": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Listar categorias",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "entrada",
+                "saida"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Categoria"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 19,
+                    "nome": "Viagens",
+                    "tipo": "saida"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Criar recurso",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaDados"
+              },
+              "examples": {
+                "categoria": {
+                  "value": {
+                    "nome": "Viagens",
+                    "tipo": "saida"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categoria"
+                },
+                "example": {
+                  "id": 19,
+                  "nome": "Viagens",
+                  "tipo": "saida"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/categorias/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "description": "ID obtido na listagem ou criação do recurso."
+        }
+      ],
+      "get": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Consultar recurso",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categoria"
+                },
+                "example": {
+                  "id": 19,
+                  "nome": "Viagens",
+                  "tipo": "saida"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Atualizar recurso",
+        "description": "Envie todos os campos editáveis. Alteração de tipo com lançamentos vinculados retorna 409.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaDados"
+              },
+              "examples": {
+                "categoria": {
+                  "value": {
+                    "nome": "Viagens",
+                    "tipo": "saida"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categoria"
+                },
+                "example": {
+                  "id": 19,
+                  "nome": "Viagens",
+                  "tipo": "saida"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Excluir recurso",
+        "responses": {
+          "204": {
+            "description": "Excluído; sem corpo."
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/fontes-destinos": {
+      "get": {
+        "tags": [
+          "Fontes e destinos"
+        ],
+        "summary": "Listar fontes e destinos",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "renda",
+                "conta",
+                "cartao_credito"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FonteDestino"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 7,
+                    "nome": "Cartão teste",
+                    "tipo": "cartao_credito",
+                    "dia_fechamento": 25,
+                    "dia_vencimento": 5,
+                    "limite": 1000
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fontes e destinos"
+        ],
+        "summary": "Criar recurso",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FonteDados"
+              },
+              "examples": {
+                "conta": {
+                  "value": {
+                    "nome": "Poupança",
+                    "tipo": "conta"
+                  }
+                },
+                "cartao": {
+                  "value": {
+                    "nome": "Cartão teste",
+                    "tipo": "cartao_credito",
+                    "dia_fechamento": 25,
+                    "dia_vencimento": 5,
+                    "limite": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FonteDestino"
+                },
+                "example": {
+                  "id": 7,
+                  "nome": "Cartão teste",
+                  "tipo": "cartao_credito",
+                  "dia_fechamento": 25,
+                  "dia_vencimento": 5,
+                  "limite": 1000
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/fontes-destinos/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "description": "ID obtido na listagem ou criação do recurso."
+        }
+      ],
+      "get": {
+        "tags": [
+          "Fontes e destinos"
+        ],
+        "summary": "Consultar recurso",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FonteDestino"
+                },
+                "example": {
+                  "id": 7,
+                  "nome": "Cartão teste",
+                  "tipo": "cartao_credito",
+                  "dia_fechamento": 25,
+                  "dia_vencimento": 5,
+                  "limite": 1000
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fontes e destinos"
+        ],
+        "summary": "Atualizar recurso",
+        "description": "Envie todos os campos editáveis. Alteração de tipo com lançamentos vinculados retorna 409.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FonteDados"
+              },
+              "examples": {
+                "conta": {
+                  "value": {
+                    "nome": "Poupança",
+                    "tipo": "conta"
+                  }
+                },
+                "cartao": {
+                  "value": {
+                    "nome": "Cartão teste",
+                    "tipo": "cartao_credito",
+                    "dia_fechamento": 25,
+                    "dia_vencimento": 5,
+                    "limite": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FonteDestino"
+                },
+                "example": {
+                  "id": 7,
+                  "nome": "Cartão teste",
+                  "tipo": "cartao_credito",
+                  "dia_fechamento": 25,
+                  "dia_vencimento": 5,
+                  "limite": 1000
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fontes e destinos"
+        ],
+        "summary": "Excluir recurso",
+        "responses": {
+          "204": {
+            "description": "Excluído; sem corpo."
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/lancamentos": {
+      "get": {
+        "tags": [
+          "Lançamentos"
+        ],
+        "summary": "Listar lançamentos e resumo",
+        "description": "20 registros por página. Datas omitidas usam o mês UTC corrente; resumo inclui todos os resultados dos filtros.",
+        "parameters": [
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-01"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-31"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "entrada",
+                "saida"
+              ]
+            }
+          },
+          {
+            "name": "categoriaId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "fonteDestinoId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listagem"
+                },
+                "example": {
+                  "periodo": {
+                    "inicio": "2026-11-01",
+                    "fim": "2026-11-30"
+                  },
+                  "resumo": {
+                    "entradas": 0,
+                    "saidas": 33.34,
+                    "saldo": -33.34
+                  },
+                  "pagina": 1,
+                  "totalPaginas": 1,
+                  "itens": [
+                    {
+                      "id": 18,
+                      "tipo": "saida",
+                      "descricao": "Curso parcelado",
+                      "valor": 33.34,
+                      "data": "2026-11-03",
+                      "categoria": {
+                        "id": 8,
+                        "nome": "Educação"
+                      },
+                      "fonteDestino": {
+                        "id": 3,
+                        "nome": "Cartão Nubank"
+                      },
+                      "parcela": "1/3",
+                      "parcela_atual": 1,
+                      "total_parcelas": 3,
+                      "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Lançamentos"
+        ],
+        "summary": "Criar lançamento ou compra parcelada",
+        "description": "IDs dos exemplos correspondem à Ana no seed intacto. Para outro usuário, obtenha suas categorias e fontes. Parcelas são criadas com a mesma data e UUID; resto dos centavos vai para a primeira.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Compra"
+              },
+              "examples": {
+                "simples": {
+                  "value": {
+                    "tipo": "saida",
+                    "descricao": "Mercado",
+                    "valor": 100,
+                    "data": "2026-11-03",
+                    "categoriaId": 3,
+                    "fonteDestinoId": 1
+                  }
+                },
+                "parcelada": {
+                  "value": {
+                    "tipo": "saida",
+                    "descricao": "Curso",
+                    "valor": 100,
+                    "data": "2026-11-03",
+                    "categoriaId": 8,
+                    "fonteDestinoId": 3,
+                    "parcelas": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompraCriada"
+                },
+                "example": {
+                  "grupo_parcelamento": "11111111-1111-4111-8111-111111111111",
+                  "itens": [
+                    {
+                      "id": 31,
+                      "valor": 33.34,
+                      "data": "2026-11-03",
+                      "parcela": "1/3",
+                      "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                    },
+                    {
+                      "id": 32,
+                      "valor": 33.33,
+                      "data": "2026-11-03",
+                      "parcela": "2/3",
+                      "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                    },
+                    {
+                      "id": 33,
+                      "valor": 33.33,
+                      "data": "2026-11-03",
+                      "parcela": "3/3",
+                      "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/lancamentos/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "description": "ID obtido na listagem ou criação do recurso."
+        }
+      ],
+      "get": {
+        "tags": [
+          "Lançamentos"
+        ],
+        "summary": "Consultar lançamento",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lancamento"
+                },
+                "example": {
+                  "id": 18,
+                  "tipo": "saida",
+                  "descricao": "Curso parcelado",
+                  "valor": 33.34,
+                  "data": "2026-11-03",
+                  "categoria": {
+                    "id": 8,
+                    "nome": "Educação"
+                  },
+                  "fonteDestino": {
+                    "id": 3,
+                    "nome": "Cartão Nubank"
+                  },
+                  "parcela": "1/3",
+                  "parcela_atual": 1,
+                  "total_parcelas": 3,
+                  "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Lançamentos"
+        ],
+        "summary": "Atualizar lançamento individual",
+        "description": "Altera apenas o ID indicado, incluindo data, tipo e referências. Preserva UUID e numeração. Não envie parcelas. As outras parcelas não são alteradas; relatórios e faturas usam os dados atualizados.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LancamentoDados"
+              },
+              "examples": {
+                "atualizacao": {
+                  "value": {
+                    "tipo": "saida",
+                    "descricao": "Curso corrigido",
+                    "valor": 33.34,
+                    "data": "2026-11-03",
+                    "categoriaId": 8,
+                    "fonteDestinoId": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lancamento"
+                },
+                "example": {
+                  "id": 18,
+                  "tipo": "saida",
+                  "descricao": "Curso corrigido",
+                  "valor": 33.34,
+                  "data": "2026-11-03",
+                  "categoria": {
+                    "id": 8,
+                    "nome": "Educação"
+                  },
+                  "fonteDestino": {
+                    "id": 3,
+                    "nome": "Cartão Nubank"
+                  },
+                  "parcela": "1/3",
+                  "parcela_atual": 1,
+                  "total_parcelas": 3,
+                  "grupo_parcelamento": "11111111-1111-4111-8111-111111111111"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Lançamentos"
+        ],
+        "summary": "Excluir lançamento ou grupo",
+        "parameters": [
+          {
+            "name": "todasParcelas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Excluído; sem corpo."
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/relatorios/categorias": {
+      "get": {
+        "tags": [
+          "Relatórios"
+        ],
+        "summary": "Totais por categoria",
+        "parameters": [
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-01"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-31"
+            }
+          }
+        ],
+        "description": "Totais decrescentes. Meses completos comparam com o mês anterior; outros períodos usam igual número de dias. Variação é null quando anterior é zero e atual é positivo.",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatorioCategorias"
+                },
+                "example": {
+                  "periodo": {
+                    "inicio": "2026-10-01",
+                    "fim": "2026-10-31"
+                  },
+                  "periodoAnterior": {
+                    "inicio": "2026-09-01",
+                    "fim": "2026-09-30"
+                  },
+                  "saidas": {
+                    "total": 100,
+                    "categorias": [
+                      {
+                        "id": 3,
+                        "nome": "Alimentação",
+                        "total": 100,
+                        "percentual": 100,
+                        "anterior": 80,
+                        "variacao": 25
+                      }
+                    ]
+                  },
+                  "entradas": {
+                    "total": 0,
+                    "categorias": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/relatorios/fontes-destinos": {
+      "get": {
+        "tags": [
+          "Relatórios"
+        ],
+        "summary": "Totais por fonte/destino",
+        "parameters": [
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-01"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-31"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatorioFontes"
+                },
+                "example": {
+                  "periodo": {
+                    "inicio": "2026-10-01",
+                    "fim": "2026-10-31"
+                  },
+                  "entradas": [
+                    {
+                      "id": 1,
+                      "nome": "Conta corrente",
+                      "total": 1000
+                    }
+                  ],
+                  "saidas": [
+                    {
+                      "id": 1,
+                      "nome": "Conta corrente",
+                      "total": 100
+                    }
+                  ],
+                  "contas": [
+                    {
+                      "id": 1,
+                      "nome": "Conta corrente",
+                      "tipo": "conta",
+                      "entradas": 1000,
+                      "saidas": 100,
+                      "saldo": 900
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/relatorios/faturas": {
+      "get": {
+        "tags": [
+          "Faturas"
+        ],
+        "summary": "Prever faturas e limites",
+        "parameters": [
+          {
+            "name": "meses",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12,
+              "default": 3
+            }
+          }
+        ],
+        "description": "Janela começa na fatura aberta. Limite utilizado inclui todos os vencimentos de hoje em diante, inclusive fora da janela. Datas dependem do dia da consulta.",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Faturas"
+                },
+                "example": {
+                  "meses": 1,
+                  "cartoes": [
+                    {
+                      "id": 3,
+                      "nome": "Cartão Nubank",
+                      "limiteTotal": 5000,
+                      "limiteUtilizado": 100,
+                      "limiteDisponivel": 4900,
+                      "faturas": [
+                        {
+                          "referencia": "2026-12",
+                          "fechamento": "2026-12-03",
+                          "vencimento": "2026-12-10",
+                          "total": 33.34,
+                          "lancamentos": [
+                            {
+                              "id": 18,
+                              "descricao": "Curso parcelado — 1/3",
+                              "valor": 33.34,
+                              "data": "2026-11-03",
+                              "parcela": "1/3"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    },
+    "/saude-financeira": {
+      "get": {
+        "tags": [
+          "Saúde financeira"
+        ],
+        "summary": "Consultar indicadores e projeção",
+        "description": "Três meses completos de histórico; projeção do mês corrente e dois seguintes. Taxas são frações e podem ser null sem renda. Saldo previsto é mensal, não acumulado.",
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saude"
+                },
+                "example": {
+                  "aviso": "Informações educativas; não constituem recomendação financeira profissional.",
+                  "historico": {
+                    "inicio": "2026-08-01",
+                    "fim": "2026-10-31"
+                  },
+                  "mesTaxaPoupanca": "2026-10",
+                  "mesesComMovimento": 3,
+                  "rendaMediaMensal": 1000,
+                  "indicadores": {
+                    "taxaPoupanca": 0.4,
+                    "comprometimentoCartoes": 0,
+                    "parcelasAVencer": 0
+                  },
+                  "projecao": [
+                    {
+                      "mes": "2026-11",
+                      "entradas": 1000,
+                      "saidasSemCartao": 600,
+                      "faturasConhecidas": 0,
+                      "saidas": 600,
+                      "saldoPrevisto": 400
+                    },
+                    {
+                      "mes": "2026-12",
+                      "entradas": 1000,
+                      "saidasSemCartao": 600,
+                      "faturasConhecidas": 0,
+                      "saidas": 600,
+                      "saldoPrevisto": 400
+                    },
+                    {
+                      "mes": "2027-01",
+                      "entradas": 1000,
+                      "saidasSemCartao": 600,
+                      "faturasConhecidas": 0,
+                      "saidas": 600,
+                      "saldoPrevisto": 400
+                    }
+                  ],
+                  "dicas": [
+                    "Os dados não acionaram os alertas definidos; mantenha os lançamentos atualizados."
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Erro500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "required": [
+          "erro"
+        ],
+        "properties": {
+          "erro": {
+            "type": "string"
+          },
+          "campos": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Cadastro": {
+        "type": "object",
+        "required": [
+          "nome",
+          "email",
+          "cpf",
+          "senha"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 160
+          },
+          "cpf": {
+            "type": "string",
+            "description": "CPF válido; aceita pontuação."
+          },
+          "senha": {
+            "type": "string",
+            "minLength": 8,
+            "pattern": "^(?=.*[A-Za-z])(?=.*[0-9]).+$",
+            "description": "Máximo de 72 bytes UTF-8."
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": [
+          "email",
+          "senha"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "senha": {
+            "type": "string"
+          }
+        }
+      },
+      "Usuario": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "UsuarioAtual": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "email",
+          "cpf",
+          "criado_em"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "criado_em": {
+            "type": "string",
+            "example": "2026-11-03 12:00:00"
+          }
+        }
+      },
+      "Autenticacao": {
+        "type": "object",
+        "required": [
+          "token",
+          "usuario"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/Usuario"
+          }
+        }
+      },
+      "CategoriaDados": {
+        "type": "object",
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "entrada",
+              "saida"
+            ]
+          }
+        }
+      },
+      "Categoria": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "tipo"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "entrada",
+              "saida"
+            ]
+          }
+        }
+      },
+      "FonteDados": {
+        "type": "object",
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "renda",
+              "conta",
+              "cartao_credito"
+            ]
+          },
+          "dia_fechamento": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "nullable": true
+          },
+          "dia_vencimento": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "nullable": true
+          },
+          "limite": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "nullable": true
+          }
+        },
+        "description": "Cartões exigem dias 1–31 e limite positivo. Outros tipos armazenam esses três campos como null.",
+        "oneOf": [
+          {
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "renda",
+                  "conta"
+                ]
+              }
+            }
+          },
+          {
+            "required": [
+              "dia_fechamento",
+              "dia_vencimento",
+              "limite"
+            ],
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "cartao_credito"
+                ]
+              },
+              "dia_fechamento": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "dia_vencimento": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "limite": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01
+              }
+            }
+          }
+        ]
+      },
+      "FonteDestino": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "tipo",
+          "dia_fechamento",
+          "dia_vencimento",
+          "limite"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "renda",
+              "conta",
+              "cartao_credito"
+            ]
+          },
+          "dia_fechamento": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "nullable": true
+          },
+          "dia_vencimento": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "nullable": true
+          },
+          "limite": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "nullable": true
+          }
+        }
+      },
+      "LancamentoDados": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "descricao",
+          "valor",
+          "data",
+          "categoriaId",
+          "fonteDestinoId"
+        ],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "entrada",
+              "saida"
+            ]
+          },
+          "descricao": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "valor": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01
+          },
+          "data": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "categoriaId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "fonteDestinoId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "Compra": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "descricao",
+          "valor",
+          "data",
+          "categoriaId",
+          "fonteDestinoId"
+        ],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "entrada",
+              "saida"
+            ]
+          },
+          "descricao": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "valor": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01
+          },
+          "data": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "categoriaId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "fonteDestinoId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "parcelas": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 48,
+            "description": "Opcional. Exige saída em cartão e pelo menos um centavo por parcela. Inclusive 1 gera UUID; omitido gera grupo null."
+          }
+        }
+      },
+      "Referencia": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          }
+        }
+      },
+      "Lancamento": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "descricao",
+          "valor",
+          "data",
+          "categoria",
+          "fonteDestino",
+          "parcela",
+          "parcela_atual",
+          "total_parcelas",
+          "grupo_parcelamento"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "entrada",
+              "saida"
+            ]
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "number"
+          },
+          "data": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/Referencia"
+          },
+          "fonteDestino": {
+            "$ref": "#/components/schemas/Referencia"
+          },
+          "parcela": {
+            "type": "string"
+          },
+          "parcela_atual": {
+            "type": "integer"
+          },
+          "total_parcelas": {
+            "type": "integer"
+          },
+          "grupo_parcelamento": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "CompraCriada": {
+        "type": "object",
+        "required": [
+          "grupo_parcelamento",
+          "itens"
+        ],
+        "properties": {
+          "grupo_parcelamento": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "valor",
+                "data",
+                "parcela",
+                "grupo_parcelamento"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "valor": {
+                  "type": "number"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "2026-11-03"
+                },
+                "parcela": {
+                  "type": "string"
+                },
+                "grupo_parcelamento": {
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "Periodo": {
+        "type": "object",
+        "required": [
+          "inicio",
+          "fim"
+        ],
+        "properties": {
+          "inicio": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "fim": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          }
+        }
+      },
+      "Listagem": {
+        "type": "object",
+        "required": [
+          "periodo",
+          "resumo",
+          "pagina",
+          "totalPaginas",
+          "itens"
+        ],
+        "properties": {
+          "periodo": {
+            "$ref": "#/components/schemas/Periodo"
+          },
+          "resumo": {
+            "type": "object",
+            "required": [
+              "entradas",
+              "saidas",
+              "saldo"
+            ],
+            "properties": {
+              "entradas": {
+                "type": "number"
+              },
+              "saidas": {
+                "type": "number"
+              },
+              "saldo": {
+                "type": "number"
+              }
+            }
+          },
+          "pagina": {
+            "type": "integer"
+          },
+          "totalPaginas": {
+            "type": "integer"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lancamento"
+            }
+          }
+        }
+      },
+      "TotalCategoria": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "total",
+          "percentual",
+          "anterior",
+          "variacao"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number"
+          },
+          "percentual": {
+            "type": "number"
+          },
+          "anterior": {
+            "type": "number"
+          },
+          "variacao": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "GrupoCategorias": {
+        "type": "object",
+        "required": [
+          "total",
+          "categorias"
+        ],
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "categorias": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TotalCategoria"
+            }
+          }
+        }
+      },
+      "RelatorioCategorias": {
+        "type": "object",
+        "required": [
+          "periodo",
+          "periodoAnterior",
+          "saidas",
+          "entradas"
+        ],
+        "properties": {
+          "periodo": {
+            "$ref": "#/components/schemas/Periodo"
+          },
+          "periodoAnterior": {
+            "$ref": "#/components/schemas/Periodo"
+          },
+          "saidas": {
+            "$ref": "#/components/schemas/GrupoCategorias"
+          },
+          "entradas": {
+            "$ref": "#/components/schemas/GrupoCategorias"
+          }
+        }
+      },
+      "TotalFonte": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "total"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      },
+      "RelatorioFontes": {
+        "type": "object",
+        "required": [
+          "periodo",
+          "entradas",
+          "saidas",
+          "contas"
+        ],
+        "properties": {
+          "periodo": {
+            "$ref": "#/components/schemas/Periodo"
+          },
+          "entradas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TotalFonte"
+            }
+          },
+          "saidas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TotalFonte"
+            }
+          },
+          "contas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "nome",
+                "tipo",
+                "entradas",
+                "saidas",
+                "saldo"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "conta"
+                  ]
+                },
+                "entradas": {
+                  "type": "number"
+                },
+                "saidas": {
+                  "type": "number"
+                },
+                "saldo": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Fatura": {
+        "type": "object",
+        "required": [
+          "referencia",
+          "fechamento",
+          "vencimento",
+          "total",
+          "lancamentos"
+        ],
+        "properties": {
+          "referencia": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$"
+          },
+          "fechamento": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "vencimento": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-03"
+          },
+          "total": {
+            "type": "number"
+          },
+          "lancamentos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "descricao",
+                "valor",
+                "data",
+                "parcela"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "descricao": {
+                  "type": "string"
+                },
+                "valor": {
+                  "type": "number"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "2026-11-03"
+                },
+                "parcela": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Faturas": {
+        "type": "object",
+        "required": [
+          "meses",
+          "cartoes"
+        ],
+        "properties": {
+          "meses": {
+            "type": "integer"
+          },
+          "cartoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "nome",
+                "limiteTotal",
+                "limiteUtilizado",
+                "limiteDisponivel",
+                "faturas"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "limiteTotal": {
+                  "type": "number"
+                },
+                "limiteUtilizado": {
+                  "type": "number"
+                },
+                "limiteDisponivel": {
+                  "type": "number"
+                },
+                "faturas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Fatura"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Saude": {
+        "type": "object",
+        "required": [
+          "aviso",
+          "historico",
+          "mesTaxaPoupanca",
+          "mesesComMovimento",
+          "rendaMediaMensal",
+          "indicadores",
+          "projecao",
+          "dicas"
+        ],
+        "properties": {
+          "aviso": {
+            "type": "string"
+          },
+          "historico": {
+            "$ref": "#/components/schemas/Periodo"
+          },
+          "mesTaxaPoupanca": {
+            "type": "string"
+          },
+          "mesesComMovimento": {
+            "type": "integer"
+          },
+          "rendaMediaMensal": {
+            "type": "number"
+          },
+          "indicadores": {
+            "type": "object",
+            "required": [
+              "taxaPoupanca",
+              "comprometimentoCartoes",
+              "parcelasAVencer"
+            ],
+            "properties": {
+              "taxaPoupanca": {
+                "type": "number",
+                "nullable": true
+              },
+              "comprometimentoCartoes": {
+                "type": "number",
+                "nullable": true
+              },
+              "parcelasAVencer": {
+                "type": "number"
+              }
+            }
+          },
+          "projecao": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "mes",
+                "entradas",
+                "saidasSemCartao",
+                "faturasConhecidas",
+                "saidas",
+                "saldoPrevisto"
+              ],
+              "properties": {
+                "mes": {
+                  "type": "string"
+                },
+                "entradas": {
+                  "type": "number"
+                },
+                "saidasSemCartao": {
+                  "type": "number"
+                },
+                "faturasConhecidas": {
+                  "type": "number"
+                },
+                "saidas": {
+                  "type": "number"
+                },
+                "saldoPrevisto": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "dicas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "Erro400": {
+        "description": "Campos, filtros ou regra de negócio inválidos.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            },
+            "example": {
+              "erro": "Dados inválidos."
+            }
+          }
+        }
+      },
+      "Erro401": {
+        "description": "Token ausente, inválido ou expirado; credenciais inválidas no login.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            },
+            "example": {
+              "erro": "Token ausente, inválido ou expirado."
+            }
+          }
+        }
+      },
+      "Erro404": {
+        "description": "Recurso ou referência inexistente ou pertencente a outro usuário.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            },
+            "example": {
+              "erro": "Lançamento não encontrado."
+            }
+          }
+        }
+      },
+      "Erro409": {
+        "description": "Duplicidade de e-mail, CPF ou nome; recurso vinculado a lançamentos.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            },
+            "example": {
+              "erro": "Registro já cadastrado."
+            }
+          }
+        }
+      },
+      "Erro500": {
+        "description": "Falha inesperada.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            },
+            "example": {
+              "erro": "Erro interno do servidor."
+            }
+          }
+        }
+      }
+    }
+  }
+}
