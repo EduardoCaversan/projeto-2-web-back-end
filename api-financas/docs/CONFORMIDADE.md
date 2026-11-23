@@ -1,4 +1,4 @@
-# Conformidade final — 16/11/2026
+# Conformidade final — 23/11/2026
 
 Eduardo Caversan da Silva Rocha — RA 2475391. Segundo integrante: **[nome e RA pendentes]**.
 Fonte de verdade: [enunciado, seções 11.1–11.12](https://costasilvati.github.io/IntroNodeJS/projeto-api-financas.html).
@@ -121,7 +121,7 @@ Os três documentos removidos não são exigidos pela professora. Conferidos con
 exclusivo e referências antes da consolidação: dez Markdown passam a sete, mantendo
 instalação, estudo, apresentação, catálogo HTTP e evidências. Histórico integral no Git.
 
-## Escopo e simplificação desta rodada
+## Escopo das mudanças de 15–16/11/2026
 
 | Classe | Ação |
 |---|---|
@@ -137,10 +137,18 @@ ou comentário da aplicação exigiu remoção. O auxiliar curl usa arquivo UTF-
 compatibilidade com PowerShell 5.1; o executor lê somente blocos do próprio repositório,
 evitando duas cópias dos comandos. Não são camadas da API.
 
-## Evidências executadas em 15–16/11/2026
+## Evidências reexecutadas em 23/11/2026
 
 Windows PowerShell 5.1, Node 22.12.0, npm 10.9.0 e MySQL 8.4.13 real em 3307.
-As datas do computador passaram de 15 para 16 durante esta revisão.
+Git iniciou limpo em 80c419d. O enunciado publicado foi relido integralmente, incluindo
+11.1–11.12. A inspeção confirmou que o código já é simples e que a explicação do PUT
+já está correta. Nenhum arquivo da aplicação, teste automatizado, schema, seed ou dependência
+precisou mudar. O .env manteve o mesmo hash SHA-256 antes e depois da execução.
+
+Melhorias desta rodada: índice com 22 links internos no catálogo, parâmetros explícitos
+nas rotas sem path/query e remoção de linhas vazias excedentes; início direto por
+npm/nodemon na etapa oficial, evitando iniciar e reiniciar a API. Mantidos os sete
+Markdown e todos os comentários que explicam regras, isolamento e transações.
 
 | Comando/verificação | Resultado efetivamente observado |
 |---|---|
@@ -151,24 +159,27 @@ As datas do computador passaram de 15 para 16 durante esta revisão.
 | Schema/seed e restrições | 2 usuários, 18 categorias, 6 fontes, 30 lançamentos; UNIQUE, CHECK e FK recusaram SQL inválido |
 | Rollback real | Falha na categoria desfez usuário; falha na segunda parcela desfez a primeira; conexão reutilizável |
 | `npm ls --depth=0` | Somente as sete dependências permitidas, nas versões anteriores |
-| `npm ci --no-audit --no-fund` | Cópia isolada sem node_modules, cache offline: 126 pacotes instalados; lockfile idêntico |
+| Instalação sem dependências | Teste histórico de 16/11: npm ci instalou 126 pacotes em cópia isolada; não repetido em 23/11 |
 | `npm install --offline --no-audit --no-fund`; `npm run dev` | Instalação sem mudança deliberada de versões e API iniciada por nodemon |
 | `executar-exemplos.ps1 -Modo A -SemPausas` | Cinco blocos HTTP completos; status esperados, totais e limites conferidos |
 | `executar-exemplos.ps1 -Modo B -SemPausas` | 23 blocos (preparação + 22 rotas); JSON e 204 sem corpo conferidos |
-| Repetição A/B | Ambos executados em duas bases: api_financas_demo_d55b2e6b31dd e api_financas_demo_bbf61274d0f1 |
+| Repetição A/B | Ambos executados em duas bases: api_financas_demo_bd61be1f51e4 e api_financas_demo_7ecace1cbb41 |
 | Totais da apresentação | Ana/outubro: 5200 entradas, 5500 saídas, Alimentação 1000/800 = 25%, conta corrente 2700; demo: 33,34/33,33/33,33, limite 100/1100 |
-| Preservação | .env e lockfile comparados com cópia por hash; schema, seed, models, routes, utils, middleware e server sem diff contra b77fffd |
-| Sintaxe e links | 7 Markdown, 47 blocos PowerShell, 28 JSON, 19 links locais e 26 JS conferidos; scripts PowerShell sem erros de parser |
-| Schema oficial | Igual ao SQL do enunciado após normalização de espaços e comentários |
+| Preservação | .env com hash idêntico antes/depois; lockfile, schema, seed, models, routes, utils, middleware, server e testes automatizados sem diff contra 80c419d |
+| Sintaxe e links | 7 Markdown, 47 blocos PowerShell, 28 JSON, 19 links locais e 26 JS conferidos; 22 âncoras do catálogo resolvidas; scripts PowerShell sem erros de parser |
+| Schema oficial | Inspecionado contra o enunciado relido; SQL permaneceu idêntico ao estado já validado |
 | Exemplos README | Login, /auth/me e /saude-financeira executados com curl.exe, HTTP 200 |
-| Modo A interativo | Segundo comando executado em terminal PowerShell, com Enter nos cinco blocos; todos os status conferidos |
+| Modo A interativo | Validado em 16/11 com Enter nos cinco blocos; nesta rodada A/B foram repetidos com -SemPausas |
 
-Integração final na base api_financas_demo_4f322e650a0d. A suíte administrativa criou
+Integração desta rodada na base api_financas_demo_bd61be1f51e4. A suíte administrativa criou
 seu próprio banco api_financas_teste_*, sem apagar o original. Bancos fictícios ficam
 para inspeção; nenhuma remoção automática. Cópia de instalação e arquivos temporários
 permanecem ignorados. Nenhum segredo ou nova biblioteca foi versionado.
 
-### Cenários do iniciador
+### Cenários históricos do iniciador — 15–16/11/2026
+
+Tabela preservada como evidência histórica. Em 23/11 repetimos a partida com banco
+novo e o encerramento por Ctrl+C; os demais cenários abaixo não foram repetidos.
 
 | Cenário executado | Evidência |
 |---|---|
